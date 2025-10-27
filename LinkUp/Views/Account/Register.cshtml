@@ -1,0 +1,174 @@
+﻿@model LinkUp.Application.ViewModels.Account.RegisterViewModel
+@{
+    ViewData["Title"] = "Crear cuenta";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-plus fs-1 text-primary"></i>
+                <h1 class="h4 mt-2 mb-1">Crear cuenta</h1>
+                <p class="text-muted mb-0">Completa tus datos para empezar en LinkUp.</p>
+            </div>
+
+            @if (TempData["Info"] is string info)
+            {
+                <div class="alert alert-info">@info</div>
+            }
+            @if (TempData["Error"] is string error)
+            {
+                <div class="alert alert-danger">@error</div>
+            }
+
+            @Html.ValidationSummary(excludePropertyErrors: true, message: null, htmlAttributes: new { @class = "text-danger mb-3" })
+
+            <form asp-action="Register" method="post" enctype="multipart/form-data" class="row g-4">
+                @Html.AntiForgeryToken()
+
+                <!-- Columna izquierda: campos -->
+                <div class="col-12 col-lg-8">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body p-4">
+
+                            <!-- Datos personales -->
+                            <div class="mb-3">
+                                <h2 class="h6 text-uppercase text-muted mb-3">Datos personales</h2>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="FirstName" class="form-label">Nombre</label>
+                                        <input asp-for="FirstName" class="form-control" placeholder="Tu nombre" />
+                                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="LastName" class="form-label">Apellido</label>
+                                        <input asp-for="LastName" class="form-control" placeholder="Tu apellido" />
+                                        <span asp-validation-for="LastName" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Acceso -->
+                            <div class="mb-3">
+                                <h2 class="h6 text-uppercase text-muted mb-3">Acceso</h2>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="Email" class="form-label">Email</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-at"></i></span>
+                                            <input asp-for="Email" class="form-control" placeholder="tucorreo@ejemplo.com" />
+                                        </div>
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="UserName" class="form-label">Usuario</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                            <input asp-for="UserName" class="form-control" placeholder="Tu usuario" />
+                                        </div>
+                                        <span asp-validation-for="UserName" class="text-danger"></span>
+                                    </div>
+                                    <!-- Teléfono RD (nuevo) -->
+                                    <div class="col-12">
+                                        <label asp-for="PhoneNumber" class="form-label">Teléfono</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                            <input asp-for="PhoneNumber" class="form-control" placeholder="809-555-1234" />
+                                        </div>
+                                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Seguridad -->
+                            <div>
+                                <h2 class="h6 text-uppercase text-muted mb-3">Seguridad</h2>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="Password" class="form-label">Contraseña</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                            <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" placeholder="••••••••" />
+                                        </div>
+                                        <span asp-validation-for="Password" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="ConfirmPassword" class="form-label">Confirmar contraseña</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                            <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password" placeholder="••••••••" />
+                                        </div>
+                                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna derecha: foto -->
+                <div class="col-12 col-lg-4">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <h2 class="h6 text-uppercase text-muted mb-3">Foto de perfil</h2>
+
+                            <div class="d-flex flex-column align-items-center text-center mb-3">
+                                <div class="rounded-circle overflow-hidden mb-3" style="width:120px;height:120px;border:1px solid rgba(0,0,0,.1);">
+                                    <img id="preview" src="~/img/default-avatar.png" class="w-100 h-100 object-fit-cover" alt="Vista previa" />
+                                </div>
+                                <small class="text-muted">Se recomienda cuadrada (p. ej. 512×512).</small>
+                            </div>
+
+                            <div class="mb-2">
+                                <label asp-for="ProfilePhoto" class="form-label">
+                                    Subir imagen (JPG/PNG/WebP, máx. 2 MB)
+                                </label>
+                                <input asp-for="ProfilePhoto" id="ProfilePhoto" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                                <span asp-validation-for="ProfilePhoto" class="text-danger"></span>
+                            </div>
+
+                            <div class="mt-auto pt-3">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="bi bi-person-check"></i> Registrarme
+                                    </button>
+                                    <a asp-action="Login" class="btn btn-outline-secondary">
+                                        <i class="bi bi-box-arrow-in-left"></i> Ya tengo cuenta
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Vista previa + validación de tamaño (2 MB) — misma lógica
+        (function () {
+          const input = document.getElementById("ProfilePhoto");
+          const preview = document.getElementById("preview");
+          if (!input || !preview) return;
+
+          input.addEventListener("change", function () {
+            const f = this.files?.[0];
+            if (!f) return;
+
+            if (f.size > 2 * 1024 * 1024) {
+              alert("El archivo excede 2 MB.");
+              this.value = "";
+              preview.src = "@Url.Content("~/img/default-avatar.png")";
+              return;
+            }
+            const url = URL.createObjectURL(f);
+            preview.src = url;
+          });
+        })();
+    </script>
+}

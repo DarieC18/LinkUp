@@ -1,0 +1,118 @@
+﻿﻿@{
+ViewData["Title"] = "Inicio";
+}
+
+<div class="container my-4">
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+
+            <!-- Publicar -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img src="~/img/default-avatar.png" class="avatar" alt="Me" />
+                        <h2 class="h5 mb-0">Crear publicación</h2>
+                    </div>
+                    <form asp-controller="Posts" asp-action="Create" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <textarea class="form-control" name="Content" rows="3" placeholder="¿Qué estás pensando? (requerido)"></textarea>
+                            <span class="text-danger field-validation-valid" data-valmsg-for="Content" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Tipo</label>
+                                <select name="MediaType" class="form-select">
+                                    <option value="">Seleccione…</option>
+                                    <option value="image">Imagen</option>
+                                    <option value="video">Video YouTube</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Imagen</label>
+                                <input type="file" name="ImageFile" class="form-control" accept="image/*" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">URL YouTube</label>
+                                <input type="url" name="YouTubeUrl" class="form-control" placeholder="https://youtube.com/..." />
+                            </div>
+                        </div>
+                        <div class="d-grid d-md-flex justify-content-end mt-3">
+                            <button class="btn btn-primary"><i class="bi bi-send"></i> Publicar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Posts -->
+            <div class="vstack gap-3">
+                @* foreach (var post in Model.Posts) { *@
+                <article class="card post-card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <img src="~/img/default-avatar.png" class="avatar" alt="Avatar" />
+                            <div>
+                                <a class="fw-semibold text-decoration-none" href="#">@User?.Identity?.Name ?? "usuario"</a>
+                                <div class="text-muted small">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                            <div class="ms-auto dropdown">
+                                <button class="btn btn-sm btn-light" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#"><i class="bi bi-pencil"></i> Editar</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash"></i> Eliminar</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="mb-3">Este es un ejemplo de publicación.</p>
+
+                        <div class="post-media mb-3">
+                            @* if (post.IsImage) { <img src="..." class="img-fluid rounded" /> } *@
+                            @* if (post.IsVideo) { <iframe src="https://www.youtube.com/embed/VIDEO_ID" allowfullscreen></iframe> } *@
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <form method="post" asp-controller="Reactions" asp-action="Like">
+                                <button class="btn btn-outline-primary btn-sm"><i class="bi bi-hand-thumbs-up"></i> Me gusta</button>
+                            </form>
+                            <form method="post" asp-controller="Reactions" asp-action="Dislike">
+                                <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-hand-thumbs-down"></i> No me gusta</button>
+                            </form>
+                        </div>
+
+                        <div class="border-top pt-3">
+                            <div class="d-flex gap-2 mb-3">
+                                <img src="~/img/default-avatar.png" class="avatar" alt="Yo" />
+                                <form class="flex-grow-1" method="post" asp-controller="Comments" asp-action="Create">
+                                    <input class="form-control" name="Text" placeholder="Escribe un comentario..." />
+                                </form>
+                            </div>
+                            @* foreach (var comment in post.Comments) { render comment + replies } *@
+                        </div>
+                    </div>
+                </article>
+                @* } *@
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Accesos rápidos</h5>
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-light" asp-controller="Friends" asp-action="Index"><i class="bi bi-people"></i> Ver amigos</a>
+                        <a class="btn btn-light d-flex align-items-center justify-content-between" asp-controller="Requests" asp-action="Index">
+                            <span><i class="bi bi-person-plus"></i> Solicitudes</span>
+                            <span class="badge text-bg-danger">@ViewBag?.PendingRequestsCount</span>
+                        </a>
+                        <a class="btn btn-light" asp-controller="Battleship" asp-action="Index"><i class="bi bi-grid-3x3-gap"></i> Battleship</a>
+                        <a class="btn btn-light" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-circle"></i> Mi perfil</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

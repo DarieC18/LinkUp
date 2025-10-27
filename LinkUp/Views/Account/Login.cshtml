@@ -1,0 +1,95 @@
+﻿@model LinkUp.Application.ViewModels.Account.LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-circle fs-1 text-primary"></i>
+                        <h1 class="h4 mt-2">Bienvenido de nuevo</h1>
+                        <p class="text-muted mb-0">Accede para continuar con LinkUp</p>
+                    </div>
+
+                    @if (TempData["Info"] is string info)
+                    {
+                        <div class="alert alert-info">@info</div>
+                    }
+                    @if (TempData["Error"] is string error)
+                    {
+                        <div class="alert alert-danger">@error</div>
+                    }
+
+                    @Html.ValidationSummary(excludePropertyErrors: true, message: null, htmlAttributes: new { @class = "text-danger mb-3" })
+
+                    <form asp-action="Login" method="post" class="vstack gap-3">
+                        @Html.AntiForgeryToken()
+
+                        <div>
+                            <label asp-for="UserNameOrEmail" class="form-label">Usuario</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="UserNameOrEmail" class="form-control" autocomplete="username" placeholder="Usuario123" />
+                            </div>
+                            <span asp-validation-for="UserNameOrEmail" class="text-danger"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Password" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" placeholder="••••••••" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-2">
+                            <input asp-for="RememberMe" class="form-check-input" id="rememberMe" />
+                            <label class="form-check-label" asp-for="RememberMe">Recordarme</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            <span>Acceder</span>
+                        </button>
+
+                        <div class="mt-4">
+                            <div class="row g-2">
+                                <div class="col-md-4 col-12">
+                                    <a asp-action="Register" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                                        <i class="bi bi-person-plus"></i>
+                                        <span>Registrarme</span>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 col-12">
+                                    <a asp-action="ForgotPassword" class="btn btn-outline-warning w-100 d-flex align-items-center justify-content-center gap-2">
+                                        <i class="bi bi-key"></i>
+                                        <span>Olvidé</span>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 col-12">
+                                    <button type="submit"
+                                            formaction="@Url.Action("ResendConfirmation", "Account")"
+                                            formmethod="post"
+                                            class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center gap-2">
+                                        <i class="bi bi-envelope"></i>
+                                        <span>Reenviar</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer bg-light text-center py-3 small text-muted">
+                    © 2025 LinkUp · Tu red de conexión social
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_ValidationScriptsPartial" />

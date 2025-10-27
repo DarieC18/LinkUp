@@ -1,0 +1,107 @@
+﻿@model LinkUp.Application.ViewModels.Profile.EditProfileViewModel
+@{
+    ViewData["Title"] = "Editar perfil";
+    var currentPhoto = ViewBag.CurrentPhoto as string;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-gear fs-1 text-primary"></i>
+                <h1 class="h4 mt-2 mb-1">Editar perfil</h1>
+                <p class="text-muted mb-0">Actualiza tus datos y foto de perfil.</p>
+            </div>
+
+            @Html.ValidationSummary(excludePropertyErrors: true, message: null, htmlAttributes: new { @class = "text-danger mb-3" })
+
+            <form asp-action="Edit" method="post" enctype="multipart/form-data" class="row g-4">
+                @Html.AntiForgeryToken()
+
+                <!-- Columna izquierda: datos -->
+                <div class="col-12 col-lg-8">
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="FirstName" class="form-label">Nombre</label>
+                                    <input asp-for="FirstName" class="form-control" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="LastName" class="form-label">Apellido</label>
+                                    <input asp-for="LastName" class="form-control" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="PhoneNumber" class="form-label">Teléfono</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                        <input asp-for="PhoneNumber" class="form-control" placeholder="809-555-1234" />
+                                    </div>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna derecha: foto -->
+                <div class="col-12 col-lg-4">
+                    <div class="card shadow-sm border-0 rounded-4 h-100">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <h2 class="h6 text-uppercase text-muted mb-3">Foto de perfil</h2>
+
+                            <div class="d-flex flex-column align-items-center text-center mb-3">
+                                <div class="rounded-circle overflow-hidden mb-3" style="width:120px;height:120px;border:1px solid rgba(0,0,0,.1);">
+                                    <img id="preview"
+                                         src="@(string.IsNullOrWhiteSpace(currentPhoto) ? Url.Content("~/img/default-avatar.png") : currentPhoto)"
+                                         class="w-100 h-100 object-fit-cover" alt="Vista previa" />
+                                </div>
+                                <small class="text-muted">JPG/PNG/WebP. Máx 2 MB. Sugerida 512×512.</small>
+                            </div>
+
+                            <div class="mb-2">
+                                <label asp-for="ProfilePhoto" class="form-label">Subir nueva imagen</label>
+                                <input asp-for="ProfilePhoto" id="ProfilePhoto" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                                <span asp-validation-for="ProfilePhoto" class="text-danger"></span>
+                            </div>
+
+                            <div class="mt-auto pt-3 d-grid d-md-flex gap-2">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-save"></i> Guardar cambios
+                                </button>
+                                <a asp-action="Index" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+          const input = document.getElementById("ProfilePhoto");
+          const preview = document.getElementById("preview");
+          if (!input || !preview) return;
+          input.addEventListener("change", function () {
+            const f = this.files?.[0];
+            if (!f) return;
+            if (f.size > 2 * 1024 * 1024) {
+              alert("El archivo excede 2 MB.");
+              this.value = "";
+              return;
+            }
+            const url = URL.createObjectURL(f);
+            preview.src = url;
+          });
+        })();
+    </script>
+}

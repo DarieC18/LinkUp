@@ -1,0 +1,167 @@
+﻿@model LinkUp.Application.ViewModels.Profile.EditProfileViewModel
+@{
+    ViewData["Title"] = "Mi Perfil";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+
+            <div class="text-center mb-4">
+                <i class="bi bi-person-gear fs-1 text-primary"></i>
+                <h1 class="h4 mt-2 mb-1">Mi Perfil</h1>
+                <p class="text-muted mb-0">Actualiza tu información personal y tu foto de perfil.</p>
+            </div>
+
+            @if (TempData["Info"] != null)
+            {
+                <div class="alert alert-success">@TempData["Info"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+
+            @Html.ValidationSummary(excludePropertyErrors: true, message: null, htmlAttributes: new { @class = "text-danger mb-3" })
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+
+                    <form asp-action="Index" method="post" enctype="multipart/form-data" id="profileForm" novalidate>
+                        @Html.AntiForgeryToken()
+
+                        <!-- Fila 1: Nombre / Apellido -->
+                        <div class="row g-3 align-items-start">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label">Nombre</label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Tu nombre" required />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label">Apellido</label>
+                                <input asp-for="LastName" class="form-control" placeholder="Tu apellido" required />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Fila 2: Teléfono / Foto -->
+                        <div class="row g-3 align-items-start mt-1">
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label">Teléfono</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="809-555-1234" required />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label d-block">Foto de perfil (opcional)</label>
+
+                                <div class="d-flex align-items-center gap-3">
+                                    <!-- Preview a la izquierda, input a la derecha -->
+                                    <div class="avatar-frame flex-shrink-0">
+                                        <img id="preview"
+                                             src="@(string.IsNullOrWhiteSpace(ViewBag.CurrentPhoto as string) ? Url.Content("~/img/default-avatar.png") : (string)ViewBag.CurrentPhoto)"
+                                             class="avatar-img"
+                                             alt="Vista previa" />
+                                    </div>
+
+                                    <div class="flex-grow-1">
+                                        <input asp-for="ProfilePhoto" id="ProfilePhoto" class="form-control" type="file" accept=".jpg,.jpeg,.png,.webp" />
+                                        <span asp-validation-for="ProfilePhoto" class="text-danger"></span>
+                                        <small class="text-muted d-block mt-1">JPG/PNG/WebP. Máx 2 MB. Sugerida 512×512.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fila 3: Contraseña / Confirmar -->
+                        <div class="row g-3 align-items-start mt-1">
+                            <div class="col-md-6">
+                                <label asp-for="Password" class="form-label">Contraseña (opcional)</label>
+                                <input asp-for="Password" class="form-control" type="password" autocomplete="new-password" placeholder="••••••••" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ConfirmPassword" class="form-label">Confirmar contraseña</label>
+                                <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password" placeholder="••••••••" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Nota + Botones -->
+                        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-md-between gap-3 mt-4">
+                            <p class="small text-muted mb-0">
+                                Todos los campos son requeridos, excepto la foto y las contraseñas. Si cambias la contraseña, ambas deben coincidir.
+                            </p>
+                            <div class="d-grid d-sm-flex gap-2 ms-md-auto">
+                                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                                    <i class="bi bi-box-arrow-in-left"></i> Volver al Home
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Guardar cambios
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        .avatar-frame {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,.08);
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    </style>
+    <script>
+        (function () {
+          const input = document.getElementById("ProfilePhoto");
+          const preview = document.getElementById("preview");
+          if (!input || !preview) return;
+
+          input.addEventListener("change", function () {
+            const f = this.files?.[0];
+            if (!f) return;
+            if (f.size > 2 * 1024 * 1024) {
+              alert("El archivo excede 2 MB.");
+              this.value = "";
+              preview.src = "@Url.Content("~/img/default-avatar.png")";
+              return;
+            }
+            const url = URL.createObjectURL(f);
+            preview.src = url;
+          });
+        })();
+
+        (function () {
+          const form = document.getElementById("profileForm");
+          if (!form) return;
+          form.addEventListener("submit", function (e) {
+            const pw = form.querySelector("[name='Password']")?.value ?? "";
+            const cf = form.querySelector("[name='ConfirmPassword']")?.value ?? "";
+            if (pw.trim().length > 0) {
+              if (!cf.trim().length) { e.preventDefault(); alert("Debes confirmar la contraseña."); return; }
+              if (pw !== cf) { e.preventDefault(); alert("La contraseña y su confirmación no coinciden."); return; }
+            }
+          });
+        })();
+    </script>
+}
