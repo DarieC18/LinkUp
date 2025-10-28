@@ -1,0 +1,27 @@
+# Build y temporales
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Publicaciones y artefactos
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rtifacts/
+*.cache/
+*.log
+
+# Configs locales
+*.local.json
+appsettings.*.local.json
+secrets.json
+.env
+
+# Frontend
+node_modules/
+dist/
