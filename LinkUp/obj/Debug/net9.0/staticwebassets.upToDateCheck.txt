@@ -127,3 +127,4 @@ wwwroot\uploads\avatars\23348ffc-0e01-4e59-b213-db5fc9817ff8.webp
 wwwroot\uploads\avatars\2e99818c-e185-4ff9-9bcf-1555e3e9a7f0.webp
 wwwroot\uploads\avatars\7656cdab-a79c-4fa0-81ff-74bb4fb7860a.webp
 wwwroot\uploads\avatars\766f24bf-6d8b-415e-9b25-bdfbabba3a39.webp
+wwwroot\uploads\posts\2025\10\a40d3cbbb6e74130b58c28cf93ec9d26.png

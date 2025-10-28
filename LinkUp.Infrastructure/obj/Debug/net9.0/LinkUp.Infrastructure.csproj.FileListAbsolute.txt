@@ -302,6 +302,7 @@ C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Infrastructure\obj\Debug\ne
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Infrastructure\obj\Debug\net9.0\LinkUp.Infrastructure.AssemblyInfoInputs.cache
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Infrastructure\obj\Debug\net9.0\LinkUp.Infrastructure.AssemblyInfo.cs
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Infrastructure\obj\Debug\net9.0\LinkUp.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Infrastructure\obj\Debug\net9.0\LinkUp.Infrastructure.sourcelink.json
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Infrastructure\obj\Debug\net9.0\LinkUp.I.9C92B23F.Up2Date
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Infrastructure\obj\Debug\net9.0\LinkUp.Infrastructure.dll
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Infrastructure\obj\Debug\net9.0\refint\LinkUp.Infrastructure.dll

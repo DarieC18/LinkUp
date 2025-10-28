@@ -1,0 +1,63 @@
+﻿@model LinkUp.Application.DTOs.Social.CommentDto
+
+<div class="d-flex gap-2">
+    <img src="@(Model.AuthorAvatarPath ?? "/img/default-avatar.png")" class="rounded-circle" width="36" height="36" alt="avatar" />
+    <div class="flex-grow-1">
+        <div class="d-flex align-items-center gap-2">
+            <strong>@Model.AuthorName</strong>
+            <span class="text-muted small">@Model.CreatedAtUtc.ToLocalTime().ToString("g")</span>
+        </div>
+
+        <div>@Model.Content</div>
+
+        <div class="mt-2 d-flex gap-3 align-items-center">
+            <button type="button" class="btn btn-link p-0 small"
+                    data-reply-toggle data-parent="@Model.Id" data-post="@Model.PostId">
+                Responder
+            </button>
+
+            @if (Model.IsMine)
+            {
+                <button type="button" class="btn btn-link p-0 small" data-edit-toggle data-id="@Model.Id">Editar</button>
+
+                <form class="d-inline"
+                      method="post"
+                      asp-controller="Comments" asp-action="Delete"
+                      data-confirm="¿Eliminar este comentario?">
+                    <input type="hidden" name="CommentId" value="@Model.Id" />
+                    <button class="btn btn-link p-0 small text-danger" type="submit">Eliminar</button>
+                </form>
+            }
+        </div>
+
+        <form class="d-none mt-2" method="post" asp-controller="Comments" asp-action="Edit"
+              data-edit-form data-id="@Model.Id">
+            <input type="hidden" name="CommentId" value="@Model.Id" />
+            <div class="input-group">
+                <input class="form-control" name="Content" value="@Model.Content" />
+                <button class="btn btn-outline-primary" type="submit">Guardar</button>
+            </div>
+        </form>
+
+        <form class="d-none mt-2" method="post"
+              asp-controller="Comments" asp-action="Reply"
+              data-reply-form data-parent="@Model.Id" data-post-id="@Model.PostId">
+            <input type="hidden" name="ParentCommentId" value="@Model.Id" />
+            <input type="hidden" name="PostId" value="@Model.PostId" />
+            <div class="input-group">
+                <input class="form-control" name="Content" placeholder="Escribe un reply..." />
+                <button class="btn btn-outline-primary" type="submit">Enviar</button>
+            </div>
+        </form>
+
+        @if (Model.Replies?.Count > 0)
+        {
+            <div class="ms-4 mt-2 vstack gap-2">
+                @foreach (var r in Model.Replies)
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_CommentItem.cshtml", r)
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LinkUp.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2a590530162cc2d5bb62bee653883c3914d2da6f")]
 [assembly: System.Reflection.AssemblyProductAttribute("LinkUp.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LinkUp.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

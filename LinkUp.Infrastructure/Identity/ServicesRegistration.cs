@@ -1,5 +1,7 @@
-﻿using LinkUp.Infrastructure.Identity.Contexts;
+﻿using LinkUp.Application.Interfaces.Users;
+using LinkUp.Infrastructure.Identity.Contexts;
 using LinkUp.Infrastructure.Identity.Entities;
+using LinkUp.Infrastructure.Identity.Queries;
 using LinkUp.Infrastructure.Identity.Services;
 using LinkUp.Infrastructure.Shared.Mail;
 using LinkUp.Shared.Mail;
@@ -55,6 +57,11 @@ namespace LinkUp.Infrastructure.Identity
             services.AddScoped<IEmailSender, MailKitEmailSender>();
 
             services.AddScoped<AccountServiceForWebApp>();
+            services.AddScoped<IUsersReadOnly, UsersReadOnly>();
+
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUser, CurrentUser>();
+
 
             return services;
         }

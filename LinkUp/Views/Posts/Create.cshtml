@@ -1,0 +1,41 @@
+﻿@model LinkUp.Application.DTOs.Social.CreatePostRequest
+
+<form asp-controller="Posts" asp-action="Create" method="post" enctype="multipart/form-data" id="postCreateForm">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">Contenido</label>
+        <textarea class="form-control" asp-for="Content" rows="3" placeholder="¿Qué estás pensando? (requerido)"></textarea>
+        <span class="text-danger" asp-validation-for="Content"></span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Tipo de medio</label>
+            <select class="form-select" asp-for="MediaType" id="mediaType">
+                <option value="">Seleccione…</option>
+                <option value="image">Imagen</option>
+                <option value="video">Video YouTube</option>
+            </select>
+            <span class="text-danger" asp-validation-for="MediaType"></span>
+        </div>
+
+        <div class="col-md-4" id="imageWrap">
+            <label class="form-label">Imagen</label>
+            <input type="file" class="form-control" asp-for="ImageFile" accept="image/*" />
+            <span class="text-danger" asp-validation-for="ImageFile"></span>
+        </div>
+
+        <div class="col-md-4" id="ytWrap">
+            <label class="form-label">URL de YouTube</label>
+            <input type="url" class="form-control" asp-for="YouTubeUrl" placeholder="https://youtube.com/..." />
+            <span class="text-danger" asp-validation-for="YouTubeUrl"></span>
+        </div>
+    </div>
+
+    <div class="d-grid d-md-flex justify-content-end mt-3">
+        <button class="btn btn-primary" type="submit">
+            <i class="bi bi-send"></i> Publicar
+        </button>
+    </div>
+</form>

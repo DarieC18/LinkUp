@@ -1,0 +1,9 @@
+﻿@model IReadOnlyList<LinkUp.Application.DTOs.Social.CommentDto>
+<form asp-antiforgery="true"></form>
+
+<div class="vstack gap-3">
+    @foreach (var c in Model)
+    {
+        @await Html.PartialAsync("~/Views/Shared/_CommentItem.cshtml", c)
+    }
+</div>

@@ -1,118 +1,360 @@
-﻿﻿@{
-ViewData["Title"] = "Inicio";
+﻿@model LinkUp.Application.DTOs.Social.PagedResult<LinkUp.Application.DTOs.Social.PostFeedItemDto>
+
+@{
+    ViewData["Title"] = "Inicio";
 }
 
 <div class="container my-4">
     <div class="row g-4">
+        <!-- Columna principal -->
         <div class="col-12 col-lg-8">
 
-            <!-- Publicar -->
+            <!-- Formulario de publicación -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <img src="~/img/default-avatar.png" class="avatar" alt="Me" />
-                        <h2 class="h5 mb-0">Crear publicación</h2>
-                    </div>
-                    <form asp-controller="Posts" asp-action="Create" method="post" enctype="multipart/form-data">
+                    <h5 class="mb-3">Crear publicación</h5>
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+                    @if (TempData["Info"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["Info"]</div>
+                    }
+
+                    <form asp-controller="Posts" asp-action="Create" method="post" enctype="multipart/form-data" id="postCreateForm">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Contenido (obligatorio) -->
                         <div class="mb-3">
-                            <textarea class="form-control" name="Content" rows="3" placeholder="¿Qué estás pensando? (requerido)"></textarea>
-                            <span class="text-danger field-validation-valid" data-valmsg-for="Content" data-valmsg-replace="true"></span>
+                            <label class="form-label">Contenido</label>
+                            <textarea name="Content" class="form-control" rows="3" placeholder="¿Qué estás pensando? (requerido)"></textarea>
                         </div>
+
                         <div class="row g-3">
+                            <!-- Tipo de medio -->
                             <div class="col-md-4">
-                                <label class="form-label">Tipo</label>
-                                <select name="MediaType" class="form-select">
+                                <label class="form-label">Tipo de medio</label>
+                                <select name="MediaType" class="form-select" id="mediaType">
                                     <option value="">Seleccione…</option>
                                     <option value="image">Imagen</option>
                                     <option value="video">Video YouTube</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Imagen</label>
+
+                            <!-- Imagen -->
+                            <div class="col-md-4" id="imageWrap">
+                                <label class="form-label">Imagen (JPG/PNG/WEBP máx. 3MB)</label>
                                 <input type="file" name="ImageFile" class="form-control" accept="image/*" />
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">URL YouTube</label>
-                                <input type="url" name="YouTubeUrl" class="form-control" placeholder="https://youtube.com/..." />
+
+                            <!-- URL YouTube -->
+                            <div class="col-md-4" id="ytWrap">
+                                <label class="form-label">URL de YouTube</label>
+                                <input type="url" name="YouTubeUrl" class="form-control" placeholder="https://youtube.com/watch?v=..." />
                             </div>
                         </div>
-                        <div class="d-grid d-md-flex justify-content-end mt-3">
-                            <button class="btn btn-primary"><i class="bi bi-send"></i> Publicar</button>
+
+                        <div class="text-end mt-3">
+                            <button class="btn btn-primary" type="submit">Publicar</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Posts -->
-            <div class="vstack gap-3">
-                @* foreach (var post in Model.Posts) { *@
-                <article class="card post-card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center gap-3 mb-2">
-                            <img src="~/img/default-avatar.png" class="avatar" alt="Avatar" />
-                            <div>
-                                <a class="fw-semibold text-decoration-none" href="#">@User?.Identity?.Name ?? "usuario"</a>
-                                <div class="text-muted small">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
-                            </div>
-                            <div class="ms-auto dropdown">
-                                <button class="btn btn-sm btn-light" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-pencil"></i> Editar</a></li>
-                                    <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash"></i> Eliminar</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <p class="mb-3">Este es un ejemplo de publicación.</p>
+            <!-- Mis publicaciones -->
+            <h5 class="mb-3">Mis publicaciones</h5>
 
-                        <div class="post-media mb-3">
-                            @* if (post.IsImage) { <img src="..." class="img-fluid rounded" /> } *@
-                            @* if (post.IsVideo) { <iframe src="https://www.youtube.com/embed/VIDEO_ID" allowfullscreen></iframe> } *@
-                        </div>
+            @if (Model.Items.Length == 0)
+            {
+                <div class="text-muted">Aún no has publicado nada.</div>
+            }
+            else
+            {
+                <div class="vstack gap-3">
+                    @foreach (var post in Model.Items)
+                    {
+                        @await Html.PartialAsync("_PostCard", post)
+                    }
+                </div>
 
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <form method="post" asp-controller="Reactions" asp-action="Like">
-                                <button class="btn btn-outline-primary btn-sm"><i class="bi bi-hand-thumbs-up"></i> Me gusta</button>
-                            </form>
-                            <form method="post" asp-controller="Reactions" asp-action="Dislike">
-                                <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-hand-thumbs-down"></i> No me gusta</button>
-                            </form>
-                        </div>
-
-                        <div class="border-top pt-3">
-                            <div class="d-flex gap-2 mb-3">
-                                <img src="~/img/default-avatar.png" class="avatar" alt="Yo" />
-                                <form class="flex-grow-1" method="post" asp-controller="Comments" asp-action="Create">
-                                    <input class="form-control" name="Text" placeholder="Escribe un comentario..." />
-                                </form>
-                            </div>
-                            @* foreach (var comment in post.Comments) { render comment + replies } *@
-                        </div>
-                    </div>
-                </article>
-                @* } *@
-            </div>
+                <nav class="mt-4">
+                    <ul class="pagination">
+                        @{
+                            var totalPages = (int)Math.Ceiling((double)Model.Total / Model.PageSize);
+                        }
+                        @for (var i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.Page ? "active" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
         </div>
 
-        <!-- Sidebar -->
+        <!-- Panel lateral -->
         <aside class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Accesos rápidos</h5>
+                    <h5 class="card-title mb-3">Menú</h5>
                     <div class="d-grid gap-2">
-                        <a class="btn btn-light" asp-controller="Friends" asp-action="Index"><i class="bi bi-people"></i> Ver amigos</a>
+                        <a class="btn btn-light d-flex align-items-center justify-content-between" asp-controller="Home" asp-action="Index">
+                            <span><i class="bi bi-house"></i> Inicio</span>
+                        </a>
+                        <a class="btn btn-light" asp-controller="Friends" asp-action="Index">
+                            <i class="bi bi-people"></i> Amigos
+                        </a>
                         <a class="btn btn-light d-flex align-items-center justify-content-between" asp-controller="Requests" asp-action="Index">
                             <span><i class="bi bi-person-plus"></i> Solicitudes</span>
-                            <span class="badge text-bg-danger">@ViewBag?.PendingRequestsCount</span>
+                            <span class="badge bg-danger">@ViewBag.PendingRequestsCount</span>
                         </a>
-                        <a class="btn btn-light" asp-controller="Battleship" asp-action="Index"><i class="bi bi-grid-3x3-gap"></i> Battleship</a>
-                        <a class="btn btn-light" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-circle"></i> Mi perfil</a>
+                        <a class="btn btn-light" asp-controller="Battleship" asp-action="Index">
+                            <i class="bi bi-grid-3x3-gap"></i> Battleship
+                        </a>
+                        <a class="btn btn-light" asp-controller="Profile" asp-action="Index">
+                            <i class="bi bi-person-circle"></i> Mi Perfil
+                        </a>
                     </div>
                 </div>
             </div>
         </aside>
     </div>
 </div>
-
 @section Scripts {
+    <script>
+        //utils
+        async function loadCommentsFor(postId) {
+          const host = document.querySelector(`[data-comments][data-post-id="${postId}"]`);
+          if (!host) return;
+          const res = await fetch(`/Comments/Thread?postId=${postId}`, { headers: { "X-Requested-With": "XMLHttpRequest" } });
+          host.innerHTML = res.ok ? await res.text() : '<div class="text-danger">Error al cargar comentarios</div>';
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+          document.querySelectorAll("[data-comments][data-post-id]").forEach(div => loadCommentsFor(div.dataset.postId));
+        });
+
+        //(Like/Dislike)
+        document.addEventListener("click", async (e) => {
+          const btn = e.target.closest("[data-react]");
+          if (!btn) return;
+
+          e.preventDefault();
+          const card = btn.closest("[data-post-card]");
+          const postId = btn.dataset.postId;
+          const type = btn.dataset.react;
+
+          const token = document.querySelector("input[name='__RequestVerificationToken']")?.value;
+          const body = new FormData();
+          if (token) body.append("__RequestVerificationToken", token);
+
+          const res = await fetch(`/Posts/React/${postId}?type=${type}`, {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            body
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+
+          const likeBtn = card.querySelector("[data-react='like']");
+          const dislikeBtn = card.querySelector("[data-react='dislike']");
+          const likeCount = card.querySelector("[data-like-count]");
+          const dislikeCount = card.querySelector("[data-dislike-count]");
+          const label = card.querySelector("[data-reaction-label]");
+
+          if (likeCount) likeCount.textContent = data.likeCount;
+          if (dislikeCount) dislikeCount.textContent = data.dislikeCount;
+
+          // Reset visual
+          label?.classList.add("d-none");
+          likeBtn?.classList.remove("d-none");
+          dislikeBtn?.classList.remove("d-none");
+
+          if (data.state === "liked") {
+            likeBtn?.classList.add("d-none");
+            if (label) { label.textContent = "Me gusta"; label.classList.remove("d-none"); }
+          } else if (data.state === "disliked") {
+            dislikeBtn?.classList.add("d-none");
+            if (label) { label.textContent = "No me gusta"; label.classList.remove("d-none"); }
+          }
+        });
+
+        //Crear comentario=
+        document.addEventListener("submit", async (e) => {
+          const form = e.target.closest("[data-comment-form]");
+          if (!form) return;
+
+          e.preventDefault();
+          const btn = form.querySelector('button[type="submit"]');
+          if (btn?.disabled) return;
+          btn && (btn.disabled = true);
+
+          const postId = form.dataset.postId;
+          const res = await fetch(`/Comments/Create`, {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            body: new FormData(form)
+          });
+
+          btn && (btn.disabled = false);
+          if (!res.ok) return;
+
+          form.reset();
+          loadCommentsFor(postId);
+        });
+
+        // crear reply
+        document.addEventListener("submit", async (e) => {
+          const form = e.target.closest("form[data-reply-form]");
+          if (!form) return;
+
+          e.preventDefault();
+          const btn = form.querySelector('button[type="submit"]');
+          if (btn?.disabled) return;
+          btn && (btn.disabled = true);
+
+          const postId = form.dataset.postId;
+          const res = await fetch(`/Comments/Reply`, {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            body: new FormData(form)
+          });
+
+          btn && (btn.disabled = false);
+          if (!res.ok) return;
+
+          form.reset();
+          form.classList.add("d-none");
+          loadCommentsFor(postId);
+        });
+
+        //Toggle Reply
+        document.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-reply-toggle]");
+          if (!btn) return;
+          const parentId = btn.dataset.parent;
+          const form = document.querySelector(`form[data-reply-form][data-parent="${parentId}"]`);
+          if (form) {
+            form.classList.toggle("d-none");
+            if (!form.classList.contains("d-none")) form.querySelector('input[name="Content"]')?.focus();
+          }
+        });
+
+        //oggle Edit comentario
+        document.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-edit-toggle]");
+          if (!btn) return;
+          const id = btn.dataset.id;
+          const form = document.querySelector(`form[data-edit-form][data-id="${id}"]`);
+          if (form) {
+            form.classList.toggle("d-none");
+            if (!form.classList.contains("d-none")) form.querySelector('input[name="Content"]')?.focus();
+          }
+        });
+
+        //Editar comentario
+        document.addEventListener("submit", async (e) => {
+          const form = e.target.closest("form[data-edit-form]");
+          if (!form) return;
+
+          e.preventDefault();
+          const btn = form.querySelector('button[type="submit"]');
+          if (btn?.disabled) return;
+          btn && (btn.disabled = true);
+
+          const card = form.closest("[data-post-card]");
+          const postId = card?.querySelector("[data-comments]")?.dataset.postId;
+
+          const res = await fetch(`/Comments/Edit`, {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            body: new FormData(form)
+          });
+
+          btn && (btn.disabled = false);
+          if (!res.ok) return;
+
+          form.classList.add("d-none");
+          if (postId) loadCommentsFor(postId);
+        });
+
+        //Eliminar comentario
+        document.addEventListener("submit", async (e) => {
+          const form = e.target.closest("form[asp-controller='Comments'][asp-action='Delete']");
+          if (!form) return;
+
+          e.preventDefault();
+
+          const card = form.closest("[data-post-card]");
+          const postId = card?.querySelector("[data-comments]")?.dataset.postId;
+
+          const res = await fetch(`/Comments/Delete`, {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            body: new FormData(form)
+          });
+
+          if (!res.ok) return;
+          if (postId) loadCommentsFor(postId);
+        });
+
+        //Modal de confirmación global
+        (() => {
+          let targetForm = null;
+          const modalEl = document.getElementById("confirmDeleteModal");
+          if (!modalEl || !window.bootstrap) return;
+
+          const modal = new bootstrap.Modal(modalEl);
+          const confirmBtn = document.getElementById("confirmDeleteBtn");
+          const msgEl = document.getElementById("confirmDeleteMessage");
+
+          // intercepta cualquier form con data-confirm
+          document.addEventListener("submit", (e) => {
+            const form = e.target.closest("form[data-confirm]");
+            if (!form) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            msgEl.textContent = form.getAttribute("data-confirm") || "¿Eliminar este elemento?";
+            targetForm = form;
+            modal.show();
+          });
+
+          confirmBtn?.addEventListener("click", () => {
+            if (targetForm) {
+              modal.hide();
+              targetForm.submit();
+              targetForm = null;
+            }
+          });
+        })();
+        // Mostrar solo el input correspondiente según el select
+        function updateMediaVisibility() {
+          const v = document.getElementById('mediaType')?.value;
+          const imgWrap = document.getElementById('imageWrap');
+          const ytWrap  = document.getElementById('ytWrap');
+          const imgInp  = imgWrap?.querySelector('input[name="ImageFile"]');
+          const ytInp   = ytWrap?.querySelector('input[name="YouTubeUrl"]');
+
+          if (!imgWrap || !ytWrap) return;
+
+          // visibilidad
+          imgWrap.style.display = (v === 'image') ? '' : 'none';
+          ytWrap.style.display  = (v === 'video') ? '' : 'none';
+
+          if (imgInp) imgInp.toggleAttribute('required', v === 'image');
+          if (ytInp)  ytInp.toggleAttribute('required',  v === 'video');
+
+          if (v !== 'image' && imgInp) imgInp.value = '';
+          if (v !== 'video' && ytInp)  ytInp.value  = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', updateMediaVisibility);
+        document.getElementById('mediaType')?.addEventListener('change', updateMediaVisibility);
+    </script>
+
     <partial name="_ValidationScriptsPartial" />
 }

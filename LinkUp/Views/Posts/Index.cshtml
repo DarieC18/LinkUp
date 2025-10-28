@@ -1,0 +1,84 @@
+﻿@model LinkUp.Application.DTOs.Social.PagedResult<LinkUp.Application.DTOs.Social.PostFeedItemDto>
+@{
+    ViewData["Title"] = "Publicaciones";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Feed</h2>
+    <a asp-action="Create" class="btn btn-primary">Crear publicación</a>
+</div>
+
+@if (TempData["Info"] != null)
+{
+    <div class="alert alert-success">@TempData["Info"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (Model.Items.Length == 0)
+{
+    <div class="text-muted">No hay publicaciones todavía.</div>
+}
+else
+{
+    <div class="vstack gap-3">
+        @foreach (var p in Model.Items)
+        {
+            @await Html.PartialAsync("_PostCard", p)
+        }
+    </div>
+
+    <nav class="mt-4">
+        <ul class="pagination">
+            @{
+                var totalPages = (int)Math.Ceiling((double)Model.Total / Model.PageSize);
+            }
+            @for (var i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("click", async (e) => {
+            const btn = e.target.closest("[data-react]");
+            if (!btn) return;
+
+            e.preventDefault();
+            const postId = btn.dataset.postId;
+            const rtype = btn.dataset.react;
+
+            const token = document.querySelector("input[name='__RequestVerificationToken']")?.value;
+            const formData = new FormData();
+            if (token) formData.append("__RequestVerificationToken", token);
+
+            const res = await fetch(`/Posts/React/${postId}?type=${rtype}`, {
+                method: "POST",
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+                body: formData
+            });
+            if (!res.ok) return;
+
+            const data = await res.json();
+            const card = btn.closest("[data-post-card]");
+            if (!card) return;
+
+            card.querySelector("[data-like-count]").textContent = data.likeCount;
+            card.querySelector("[data-dislike-count]").textContent = data.dislikeCount;
+
+            card.querySelectorAll("[data-react]").forEach(el => el.classList.remove("btn-success","btn-danger"));
+            if (data.state === "liked") {
+                card.querySelector("[data-react='like']").classList.add("btn-success");
+            } else if (data.state === "disliked") {
+                card.querySelector("[data-react='dislike']").classList.add("btn-danger");
+            }
+        });
+    </script>
+}

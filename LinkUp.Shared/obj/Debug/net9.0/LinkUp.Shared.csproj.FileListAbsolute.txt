@@ -296,6 +296,7 @@ C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Shared\obj\Debug\net9.0\Lin
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Shared\obj\Debug\net9.0\LinkUp.Shared.AssemblyInfoInputs.cache
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Shared\obj\Debug\net9.0\LinkUp.Shared.AssemblyInfo.cs
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Shared\obj\Debug\net9.0\LinkUp.Shared.csproj.CoreCompileInputs.cache
+C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Shared\obj\Debug\net9.0\LinkUp.Shared.sourcelink.json
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Shared\obj\Debug\net9.0\LinkUp.Shared.dll
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Shared\obj\Debug\net9.0\refint\LinkUp.Shared.dll
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Shared\obj\Debug\net9.0\LinkUp.Shared.pdb

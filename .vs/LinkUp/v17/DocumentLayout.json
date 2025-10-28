@@ -3,8 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\darie\\OneDrive\\Desktop\\VS2022\\LinkUp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B9E3D972-E70C-43DB-986A-7ECCBFFB581D}|LinkUp.Infrastructure\\LinkUp.Infrastructure.csproj|c:\\users\\darie\\onedrive\\desktop\\vs2022\\linkup\\linkup.infrastructure\\persistence\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B9E3D972-E70C-43DB-986A-7ECCBFFB581D}|LinkUp.Infrastructure\\LinkUp.Infrastructure.csproj|solutionrelative:linkup.infrastructure\\persistence\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{23390018-8D4D-4356-B2AA-D7A3CE1CD6F5}|LinkUp\\LinkUp.Web.csproj|c:\\users\\darie\\onedrive\\desktop\\vs2022\\linkup\\linkup\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23390018-8D4D-4356-B2AA-D7A3CE1CD6F5}|LinkUp\\LinkUp.Web.csproj|solutionrelative:linkup\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23390018-8D4D-4356-B2AA-D7A3CE1CD6F5}|LinkUp\\LinkUp.Web.csproj|c:\\users\\darie\\onedrive\\desktop\\vs2022\\linkup\\linkup\\views\\posts\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23390018-8D4D-4356-B2AA-D7A3CE1CD6F5}|LinkUp\\LinkUp.Web.csproj|solutionrelative:linkup\\views\\posts\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23390018-8D4D-4356-B2AA-D7A3CE1CD6F5}|LinkUp\\LinkUp.Web.csproj|c:\\users\\darie\\onedrive\\desktop\\vs2022\\linkup\\linkup\\views\\posts\\_postcard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23390018-8D4D-4356-B2AA-D7A3CE1CD6F5}|LinkUp\\LinkUp.Web.csproj|solutionrelative:linkup\\views\\posts\\_postcard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -26,15 +34,41 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "_PostCard.cshtml",
+              "DocumentMoniker": "C:\\Users\\darie\\OneDrive\\Desktop\\VS2022\\LinkUp\\LinkUp\\Views\\Posts\\_PostCard.cshtml",
+              "RelativeDocumentMoniker": "LinkUp\\Views\\Posts\\_PostCard.cshtml",
+              "ToolTip": "C:\\Users\\darie\\OneDrive\\Desktop\\VS2022\\LinkUp\\LinkUp\\Views\\Posts\\_PostCard.cshtml",
+              "RelativeToolTip": "LinkUp\\Views\\Posts\\_PostCard.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-28T03:11:01.666Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ApplicationDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\darie\\OneDrive\\Desktop\\VS2022\\LinkUp\\LinkUp.Infrastructure\\Persistence\\ApplicationDbContext.cs",
-              "RelativeDocumentMoniker": "LinkUp.Infrastructure\\Persistence\\ApplicationDbContext.cs",
-              "ToolTip": "C:\\Users\\darie\\OneDrive\\Desktop\\VS2022\\LinkUp\\LinkUp.Infrastructure\\Persistence\\ApplicationDbContext.cs",
-              "RelativeToolTip": "LinkUp.Infrastructure\\Persistence\\ApplicationDbContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-27T18:48:00.6Z",
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\darie\\OneDrive\\Desktop\\VS2022\\LinkUp\\LinkUp\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "LinkUp\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\darie\\OneDrive\\Desktop\\VS2022\\LinkUp\\LinkUp\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "LinkUp\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-28T03:09:51.908Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\darie\\OneDrive\\Desktop\\VS2022\\LinkUp\\LinkUp\\Views\\Posts\\Create.cshtml",
+              "RelativeDocumentMoniker": "LinkUp\\Views\\Posts\\Create.cshtml",
+              "ToolTip": "C:\\Users\\darie\\OneDrive\\Desktop\\VS2022\\LinkUp\\LinkUp\\Views\\Posts\\Create.cshtml",
+              "RelativeToolTip": "LinkUp\\Views\\Posts\\Create.cshtml",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-28T02:59:15.959Z",
               "EditorCaption": ""
             }
           ]

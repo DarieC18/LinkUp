@@ -300,6 +300,7 @@ C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Application\obj\Debug\net9.
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Application\obj\Debug\net9.0\LinkUp.Application.AssemblyInfoInputs.cache
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Application\obj\Debug\net9.0\LinkUp.Application.AssemblyInfo.cs
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Application\obj\Debug\net9.0\LinkUp.Application.csproj.CoreCompileInputs.cache
+C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Application\obj\Debug\net9.0\LinkUp.Application.sourcelink.json
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Application\obj\Debug\net9.0\LinkUp.A.7203195B.Up2Date
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Application\obj\Debug\net9.0\LinkUp.Application.dll
 C:\Users\darie\OneDrive\Desktop\VS2022\LinkUp\LinkUp.Application\obj\Debug\net9.0\refint\LinkUp.Application.dll

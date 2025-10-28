@@ -1,0 +1,74 @@
+﻿@model LinkUp.Application.DTOs.Social.PostFeedItemDto
+@using System.Security.Claims
+
+@{
+    var currentUserId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var isMine = (Model.AuthorId == currentUserId);
+}
+
+<article class="card post-card border-0 shadow-sm mb-3" data-post-card>
+    <div class="card-body">
+        <div class="d-flex align-items-center gap-3 mb-2">
+            <img src="@(Model.AuthorAvatarPath ?? "/img/default-avatar.png")" class="avatar" alt="Avatar" />
+            <div>
+                <strong class="fw-semibold">@Model.AuthorName</strong>
+                <div class="text-muted small">@Model.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
+            </div>
+
+            @if (isMine)
+            {
+                <div class="ms-auto dropdown">
+                    <button class="btn btn-sm btn-light" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" asp-controller="Posts" asp-action="Edit" asp-route-id="@Model.Id">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                        </li>
+                        <li>
+                            <form method="post" asp-controller="Posts" asp-action="Delete" data-confirm="¿Eliminar esta publicación definitivamente?">
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <button class="dropdown-item text-danger" type="submit">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            }
+        </div>
+
+        <p class="mb-3">@Model.Content</p>
+
+        <div class="post-media mb-3">
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="@Model.ImagePath" class="img-fluid rounded" />
+            }
+            else if (!string.IsNullOrEmpty(Model.YouTubeVideoId))
+            {
+                <div class="ratio ratio-16x9">
+                    <iframe src="https://www.youtube.com/embed/@Model.YouTubeVideoId" title="YouTube video" allowfullscreen></iframe>
+                </div>
+            }
+        </div>
+
+        @await Html.PartialAsync("~/Views/Shared/_ReactionBar.cshtml", Model)
+
+        <form method="post"
+              asp-controller="Comments" asp-action="Create"
+              class="mb-3"
+              data-comment-form
+              data-post-id="@Model.Id">
+            <input type="hidden" name="PostId" value="@Model.Id" />
+            <div class="input-group">
+                <input class="form-control" name="Content" placeholder="Escribe un comentario..." />
+                <button class="btn btn-outline-primary" type="submit">Comentar</button>
+            </div>
+        </form>
+
+        <div data-comments data-post-id="@Model.Id">
+            <div class="text-muted">Cargando comentarios…</div>
+        </div>
+    </div>
+</article>

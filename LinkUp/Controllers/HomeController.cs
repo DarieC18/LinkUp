@@ -1,34 +1,50 @@
-using LinkUp.Models;
+using LinkUp.Application.DTOs.Social;
+using LinkUp.Application.Interfaces.Social;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using System.Security.Claims;
 
-namespace LinkUp.Controllers
+namespace LinkUp.Web.Controllers
 {
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IPostService _postService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IPostService postService)
         {
-            _logger = logger;
+            _postService = postService;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> Index(int page = 1)
         {
-            return View();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var feed = await _postService.GetFeedAsync(new GetFeedRequest
+            {
+                CurrentUserId = userId,
+                UserIdFilter = userId,
+                Page = page,
+                PageSize = 15
+            });
+
+            return View(feed);
         }
 
-        public IActionResult Privacy()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreatePostRequest model)
         {
-            return View();
-        }
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Revisa el formulario de publicación.";
+                return RedirectToAction("Index");
+            }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            await _postService.CreateAsync(model);
+            TempData["Info"] = "Publicación creada.";
+            return RedirectToAction("Index");
         }
     }
 }
