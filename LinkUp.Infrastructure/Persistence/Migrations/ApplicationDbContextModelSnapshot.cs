@@ -22,6 +22,138 @@ namespace LinkUp.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("LinkUp.Domain.Entities.Battleship.BattleshipAttack", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AttackerUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Col")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsHit")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Row")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TurnIndex")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId", "AttackerUserId", "Row", "Col")
+                        .IsUnique();
+
+                    b.ToTable("BattleshipAttacks");
+                });
+
+            modelBuilder.Entity("LinkUp.Domain.Entities.Battleship.BattleshipBoard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CellsCompressed")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsPlacementComplete")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OwnerUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId", "OwnerUserId")
+                        .IsUnique();
+
+                    b.ToTable("BattleshipBoards");
+                });
+
+            modelBuilder.Entity("LinkUp.Domain.Entities.Battleship.BattleshipGame", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CurrentTurnUserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("FinishedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Player1Id")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Player2Id")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WinnerUserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Player1Id", "Player2Id", "Status");
+
+                    b.ToTable("BattleshipGames");
+                });
+
+            modelBuilder.Entity("LinkUp.Domain.Entities.Battleship.BattleshipShipPlacement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BoardId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Direction")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OriginCol")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OriginRow")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShipType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BoardId", "ShipType")
+                        .IsUnique();
+
+                    b.ToTable("BattleshipShipPlacements");
+                });
+
             modelBuilder.Entity("LinkUp.Domain.Entities.Social.Comment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -57,6 +189,68 @@ namespace LinkUp.Infrastructure.Persistence.Migrations
                     b.HasIndex("PostId", "CreatedAtUtc");
 
                     b.ToTable("Comments", (string)null);
+                });
+
+            modelBuilder.Entity("LinkUp.Domain.Entities.Social.FriendRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("FromUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("RespondedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ToUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromUserId", "ToUserId")
+                        .IsUnique()
+                        .HasFilter("[Status] = 0");
+
+                    b.HasIndex("ToUserId", "Status");
+
+                    b.ToTable("FriendRequests", (string)null);
+                });
+
+            modelBuilder.Entity("LinkUp.Domain.Entities.Social.Friendship", b =>
+                {
+                    b.Property<string>("UserId1")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId2")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("UserId1", "UserId2");
+
+                    b.HasIndex("UserId1");
+
+                    b.HasIndex("UserId2");
+
+                    b.ToTable("Friendships", (string)null);
                 });
 
             modelBuilder.Entity("LinkUp.Domain.Entities.Social.Post", b =>
@@ -140,6 +334,39 @@ namespace LinkUp.Infrastructure.Persistence.Migrations
                     b.ToTable("Reactions", (string)null);
                 });
 
+            modelBuilder.Entity("LinkUp.Domain.Entities.Battleship.BattleshipAttack", b =>
+                {
+                    b.HasOne("LinkUp.Domain.Entities.Battleship.BattleshipGame", "Game")
+                        .WithMany("Attacks")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+                });
+
+            modelBuilder.Entity("LinkUp.Domain.Entities.Battleship.BattleshipBoard", b =>
+                {
+                    b.HasOne("LinkUp.Domain.Entities.Battleship.BattleshipGame", "Game")
+                        .WithMany("Boards")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+                });
+
+            modelBuilder.Entity("LinkUp.Domain.Entities.Battleship.BattleshipShipPlacement", b =>
+                {
+                    b.HasOne("LinkUp.Domain.Entities.Battleship.BattleshipBoard", "Board")
+                        .WithMany("ShipPlacements")
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Board");
+                });
+
             modelBuilder.Entity("LinkUp.Domain.Entities.Social.Comment", b =>
                 {
                     b.HasOne("LinkUp.Domain.Entities.Social.Comment", "ParentComment")
@@ -167,6 +394,18 @@ namespace LinkUp.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("LinkUp.Domain.Entities.Battleship.BattleshipBoard", b =>
+                {
+                    b.Navigation("ShipPlacements");
+                });
+
+            modelBuilder.Entity("LinkUp.Domain.Entities.Battleship.BattleshipGame", b =>
+                {
+                    b.Navigation("Attacks");
+
+                    b.Navigation("Boards");
                 });
 
             modelBuilder.Entity("LinkUp.Domain.Entities.Social.Post", b =>

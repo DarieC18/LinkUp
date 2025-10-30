@@ -1,0 +1,32 @@
+﻿@model LinkUp.Application.ViewModels.Battleship.SelectShipVm
+@{
+    ViewData["Title"] = "Colocar barcos";
+}
+
+<h2>Colocar barcos</h2>
+
+@if (!Model.PendingShips.Any())
+{
+    <div class="alert alert-success">
+        Ya colocaste todos tus barcos.
+        <a asp-action="Board" asp-route-gameId="@Model.GameId" class="btn btn-outline-primary btn-sm">Ver tablero</a>
+    </div>
+}
+else
+{
+    <p class="text-muted">Selecciona el barco que deseas posicionar.</p>
+    <form asp-action="Board" method="get">
+        <input type="hidden" name="gameId" value="@Model.GameId" />
+        <div class="mb-3">
+            <select class="form-select" name="ShipType" required>
+                <option value="">-- Selecciona un barco --</option>
+                @foreach (var s in Model.PendingShips)
+                {
+                    <option value="@s">@s</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Posicionar</button>
+        <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    </form>
+}

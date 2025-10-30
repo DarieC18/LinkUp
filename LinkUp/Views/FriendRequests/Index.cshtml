@@ -1,0 +1,139 @@
+﻿@model LinkUp.Application.ViewModels.Friends.FriendRequestsIndexVm
+
+@{
+    ViewData["Title"] = "Solicitudes";
+}
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var tokens = Antiforgery.GetAndStoreTokens(Context);
+}
+<input type="hidden" name="__RequestVerificationToken" value="@tokens.RequestToken" />
+
+<h2 class="mb-3">Solicitudes</h2>
+
+@if (TempData["Info"] != null)
+{
+    <div class="alert alert-success">@TempData["Info"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="row g-4">
+
+    <!-- Solicitudes recibidas -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-bold">Recibidas</div>
+            <div class="card-body p-0">
+
+                @if (!Model.Received.Any())
+                {
+                    <div class="p-3 text-muted">No tienes solicitudes pendientes.</div>
+                }
+                else
+                {
+                    <table class="table mb-0 align-middle">
+                        <tbody>
+                            @foreach (var r in Model.Received)
+                            {
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(r.AvatarUrl))
+                                            {
+                                                <img src="@r.AvatarUrl"
+                                                     class="rounded-circle"
+                                                     width="36"
+                                                     height="36" />
+                                            }
+                                            <div>
+                                                <div class="fw-semibold">@r.DisplayName</div>
+                                                <div class="text-muted small">
+                                                    @r.MutualFriendsCount amistades en común
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="Accept"
+                                           asp-route-id="@r.Id"
+                                           class="btn btn-sm btn-success me-1">
+                                            Aceptar
+                                        </a>
+                                        <a asp-action="Reject"
+                                           asp-route-id="@r.Id"
+                                           class="btn btn-sm btn-outline-danger">
+                                            Rechazar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón Nueva solicitud -->
+    <div class="d-flex justify-content-end mb-3">
+        <a asp-action="New" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Nueva solicitud
+        </a>
+    </div>
+
+    <!-- Solicitudes enviadas -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header fw-bold">Enviadas</div>
+            <div class="card-body p-0">
+
+                @if (!Model.Sent.Any())
+                {
+                    <div class="p-3 text-muted">No has enviado solicitudes.</div>
+                }
+                else
+                {
+                    <table class="table mb-0 align-middle">
+                        <tbody>
+                            @foreach (var r in Model.Sent)
+                            {
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(r.AvatarUrl))
+                                            {
+                                                <img src="@r.AvatarUrl"
+                                                     class="rounded-circle"
+                                                     width="36"
+                                                     height="36" />
+                                            }
+                                            <div>
+                                                <div class="fw-semibold">@r.DisplayName</div>
+                                                <div class="text-muted small">
+                                                    Enviada @r.CreatedAtUtc.ToLocalTime()
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="Cancel"
+                                           asp-route-id="@r.Id"
+                                           class="btn btn-sm btn-outline-secondary">
+                                            Cancelar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>

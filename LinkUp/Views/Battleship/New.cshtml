@@ -1,0 +1,22 @@
+﻿@model IReadOnlyList<LinkUp.Application.DTOs.Battleship.FriendOptionDto>
+@{
+    ViewData["Title"] = "Nueva partida";
+}
+
+<h2>Nueva partida</h2>
+
+<form asp-action="New" method="post">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label class="form-label">Selecciona un amigo:</label>
+        <select class="form-select" name="FriendUserId" required>
+            <option value="">-- Selecciona --</option>
+            @foreach (var f in Model)
+            {
+                <option value="@f.UserId">@f.UserName</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Iniciar partida</button>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</form>

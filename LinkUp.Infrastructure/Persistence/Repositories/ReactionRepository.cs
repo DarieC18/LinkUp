@@ -9,6 +9,7 @@ public class ReactionRepository : IReactionRepository
 {
     private readonly ApplicationDbContext _db;
     public ReactionRepository(ApplicationDbContext db) => _db = db;
+    public ApplicationDbContext DbContext => _db;
 
     public Task<Reaction?> GetAsync(Guid postId, string userId) =>
         _db.Reactions.FirstOrDefaultAsync(r => r.PostId == postId && r.UserId == userId)!;

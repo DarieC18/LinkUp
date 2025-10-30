@@ -1,9 +1,19 @@
-﻿@model IReadOnlyList<LinkUp.Application.DTOs.Social.CommentDto>
-<form asp-antiforgery="true"></form>
+﻿@model IEnumerable<LinkUp.Application.DTOs.Social.CommentDto>
 
-<div class="vstack gap-3">
-    @foreach (var c in Model)
-    {
-        @await Html.PartialAsync("~/Views/Shared/_CommentItem.cshtml", c)
-    }
-</div>
+<form class="d-none" data-af="comments" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <div class="list-group list-group-flush">
+        @foreach (var c in Model)
+        {
+            @await Html.PartialAsync("_CommentItem", c, new ViewDataDictionary(ViewData))
+        }
+    </div>
+}
+else
+{
+    <div class="text-muted small">Sé el primero en comentar</div>
+}

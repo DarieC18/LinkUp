@@ -1,0 +1,59 @@
+﻿@using LinkUp.Application.DTOs.Social
+@model PagedResult<PostFeedItemDto>
+
+@{
+    ViewData["Title"] = "Publicaciones de amigo";
+    var friendName = ViewBag.FriendName as string ?? Model.Items.FirstOrDefault()?.AuthorName ?? "Usuario";
+    var friendId = Model.Items.FirstOrDefault()?.AuthorId;
+    var totalPages = (int)Math.Ceiling(Model.Total / (double)Model.PageSize);
+}
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var tokens = Antiforgery.GetAndStoreTokens(Context);
+}
+<input type="hidden" name="__RequestVerificationToken" value="@tokens.RequestToken" />
+
+<div class="row g-4 mt-3">
+    <div class="col-12 col-lg-8" data-context="friends">
+        <h4 class="mb-3">Publicaciones de @friendName</h4>
+
+        @if (Model.Items.Length == 0)
+        {
+            <div class="alert alert-info">Este amigo aún no tiene publicaciones.</div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var post in Model.Items)
+                {
+                    @await Html.PartialAsync("_PostCard", post)
+                }
+            </div>
+
+            @if (totalPages > 1)
+            {
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.Page ? "active" : "")">
+                                <a class="page-link"
+                                   asp-controller="Friends"
+                                   asp-action="Posts"
+                                   asp-route-idOrUsername="@(friendId ?? "")"
+                                   asp-route-page="@i">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="~/Views/Shared/_FeedInlineScripts.cshtml" />
+}

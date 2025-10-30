@@ -1,0 +1,133 @@
+﻿@model LinkUp.Application.ViewModels.Friends.FriendsIndexVm
+@{
+    ViewData["Title"] = "Amigos";
+}
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var tokens = Antiforgery.GetAndStoreTokens(Context);
+}
+<input type="hidden" name="__RequestVerificationToken" value="@tokens.RequestToken" />
+
+<div class="row g-4 mt-3">
+    <!-- Feed principal -->
+    <div class="col-12 col-lg-8" data-context="friends">
+        <h4 class="mb-3">Publicaciones de mis amigos</h4>
+
+        @if (!Model.Posts.Any())
+        {
+            <div class="alert alert-secondary">Tus amigos aún no han publicado nada.</div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var post in Model.Posts)
+                {
+                    @await Html.PartialAsync("_PostCard", post)
+                }
+
+            </div>
+        }
+    </div>
+
+    <!-- Lista lateral de amigos -->
+    <aside class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm sticky-lg-top" style="top: 84px;">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-people-fill me-1"></i> Mis amigos
+                </h5>
+                <div class="friends-scrollbox">
+                    @if (!Model.Friends.Any())
+                    {
+                        <div class="text-muted">Aún no tienes amigos agregados.</div>
+                    }
+                    else
+                    {
+                        <div class="list-group">
+                            @foreach (var f in Model.Friends)
+                            {
+                                <div class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (!string.IsNullOrEmpty(f.AvatarUrl))
+                                        {
+                                            <img src="@f.AvatarUrl" class="rounded-circle" width="36" height="36" />
+                                        }
+                                        <div>
+                                            <div class="fw-semibold">
+                                                <a asp-controller="Friends"
+                                                   asp-action="Posts"
+                                                   asp-route-idOrUsername="@f.UserId"
+                                                   class="text-decoration-none">
+                                                    @f.DisplayName
+                                                </a>
+                                            </div>
+                                            <div class="text-muted small">@f.MutualFriendsCount amigos en común</div>
+                                        </div>
+                                    </div>
+
+                                    <form asp-action="Remove" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@f.UserId" />
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger js-confirm"
+                                                data-name="@f.DisplayName"
+                                                data-message="¿Estás seguro que deseas eliminar a @f.DisplayName de tu lista de amigos?">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                ¿Seguro que deseas eliminar a <strong id="friendName"></strong> de tus amigos?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="~/Views/Shared/_FeedInlineScripts.cshtml" />
+
+    <script>
+        (function () {
+            let formToSubmit = null;
+            const modalEl = document.getElementById('confirmDeleteModal');
+            const nameEl = document.getElementById('friendName');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+
+            document.querySelectorAll('.js-confirm').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    formToSubmit = this.closest('form');
+                    const friendName = this.getAttribute('data-name') || '';
+                    nameEl.textContent = friendName;
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                });
+            });
+
+            confirmBtn.addEventListener('click', function () {
+                if (formToSubmit) {
+                    formToSubmit.submit();
+                }
+            });
+        })();
+    </script>
+}

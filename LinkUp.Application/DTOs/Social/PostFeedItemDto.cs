@@ -17,6 +17,8 @@
 
         public bool? MyReactionIsLike { get; set; }
         public bool? MyReactionIsDislike { get; set; }
+        public IReadOnlyList<CommentDto>? Comments { get; set; }
+
     }
 
     public class GetFeedRequest

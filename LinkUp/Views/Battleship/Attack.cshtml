@@ -1,0 +1,95 @@
+﻿@model LinkUp.Application.ViewModels.Battleship.AttackVm
+@{
+    ViewData["Title"] = "Tablero de ataque";
+}
+
+<h2>Tablero de ataque</h2>
+
+<p><strong>@Model.TurnMessage</strong></p>
+
+<form id="attackForm" method="post" action="@Url.Action("DoAttack","Battleship")" class="d-none">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="GameId" value="@Model.GameId" />
+    <input type="hidden" name="Row" />
+    <input type="hidden" name="Col" />
+</form>
+
+<form id="surrenderForm" method="post" action="@Url.Action("Surrender","Battleship")" class="d-none">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="gameId" value="@Model.GameId" />
+</form>
+
+<div class="d-inline-block border border-2 rounded p-1">
+    <table id="attackBoard" class="table table-bordered mb-0">
+        <tbody>
+            @for (int r = 0; r < Model.BoardSize; r++)
+            {
+                <tr>
+                    @for (int c = 0; c < Model.BoardSize; c++)
+                    {
+                        var state = Model.AttackState[r, c];
+                        string color = state switch
+                        {
+                            1 => "bg-danger",  // impacto
+                            0 => "bg-primary", // agua
+                            _ => "bg-light"    // sin atacar
+                        };
+                        <td style="width:30px; height:30px;">
+                            @if (state == -1 && Model.IsMyTurn && !Model.IsGameFinished)
+                            {
+                                <button type="button"
+                                        class="cell btn btn-sm p-0 w-100 h-100 border-0 @color"
+                                        data-row="@r" data-col="@c"
+                                        title="Atacar"
+                                        aria-label="Atacar fila @r, columna @c">
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 border @color"></div>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-3 d-flex gap-2">
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+
+    <a asp-action="Board" asp-route-gameId="@Model.GameId" class="btn btn-outline-primary">
+        Ver mi tablero
+    </a>
+
+    @if (!Model.IsGameFinished)
+    {
+        <button type="submit" class="btn btn-outline-danger" form="surrenderForm">
+            Rendirse
+        </button>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const board = document.getElementById('attackBoard');
+            const form = document.getElementById('attackForm');
+
+            if (board) {
+                board.addEventListener('click', function (e) {
+                    const btn = e.target.closest('.cell');
+                    if (!btn) return;
+
+                    const row = +btn.dataset.row;
+                    const col = +btn.dataset.col;
+
+                    form.elements['Row'].value = row;
+                    form.elements['Col'].value = col;
+                    form.submit();
+                });
+            }
+        })();
+    </script>
+}

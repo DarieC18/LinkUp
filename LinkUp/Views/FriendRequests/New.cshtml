@@ -1,0 +1,76 @@
+﻿@model List<LinkUp.Application.DTOs.UserSelectableDto>
+@{
+    ViewData["Title"] = "Nueva solicitud";
+}
+
+<h3 class="mb-4">Enviar nueva solicitud de amistad</h3>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Info"] != null)
+{
+    <div class="alert alert-success">@TempData["Info"]</div>
+}
+
+<form asp-action="SendRequest" method="post" class="card border-0 shadow-sm">
+    @Html.AntiForgeryToken()
+
+    <div class="card-body">
+        <div class="d-flex mb-3">
+            <input type="text" id="searchBox" name="search" value="@ViewBag.Search"
+                   class="form-control me-2" placeholder="Buscar usuario..." />
+            <button type="submit" formaction="@Url.Action("New")" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-muted">No hay usuarios disponibles para enviar solicitud.</div>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var u in Model)
+                {
+                    <label class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            @if (!string.IsNullOrEmpty(u.AvatarPath))
+                            {
+                                <img src="@u.AvatarPath" class="rounded-circle" width="40" height="40" />
+                            }
+                            <div>
+                                <div class="fw-semibold">@u.FullName</div>
+                                <small class="text-muted">@u.MutualFriendsCount amigos en común</small>
+                            </div>
+                        </div>
+                        <input type="radio" name="selectedUserId" value="@u.Id" />
+                    </label>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="card-footer d-flex justify-content-between">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send"></i> Enviar solicitud
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        // Filtro en vivo sin recargar
+        document.getElementById("searchBox").addEventListener("keyup", function () {
+            const term = this.value.toLowerCase();
+            document.querySelectorAll(".list-group-item").forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(term) ? "" : "none";
+            });
+        });
+    </script>
+}

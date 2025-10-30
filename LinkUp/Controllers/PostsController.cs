@@ -3,6 +3,7 @@ using LinkUp.Application.Interfaces.Social;
 using LinkUp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace LinkUp.Web.Controllers
@@ -39,18 +40,18 @@ namespace LinkUp.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreatePostRequest model)
         {
+            model.MediaType = (model.MediaType ?? "").Trim().ToLowerInvariant();
+
             if (string.IsNullOrWhiteSpace(model.Content))
                 ModelState.AddModelError(nameof(model.Content), "El contenido es obligatorio.");
 
-            var media = (model.MediaType ?? string.Empty).ToLowerInvariant();
-
-            if (media == "image")
+            if (model.MediaType == "image")
             {
-                if (model.ImageFile is null || model.ImageFile.Length == 0)
+                if (model.ImageFile == null || model.ImageFile.Length == 0)
                     ModelState.AddModelError(nameof(model.ImageFile), "Debes adjuntar una imagen.");
                 model.YouTubeUrl = null;
             }
-            else if (media == "video")
+            else if (model.MediaType == "video")
             {
                 if (string.IsNullOrWhiteSpace(model.YouTubeUrl))
                     ModelState.AddModelError(nameof(model.YouTubeUrl), "Debes pegar un enlace de YouTube.");
@@ -67,18 +68,31 @@ namespace LinkUp.Web.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            await _postService.CreateAsync(model);
-            TempData["Info"] = "Publicación creada.";
+            try
+            {
+                await _postService.CreateAsync(model);
+                TempData["Info"] = "Publicación creada.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
             return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> React(Guid id, string type)
+        public async Task<IActionResult> React(Guid id, string type, CancellationToken ct)
         {
+            if (string.IsNullOrWhiteSpace(type))
+                return BadRequest("Missing reaction type.");
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            var rt = type?.ToLowerInvariant() == "like" ? ReactionType.Like : ReactionType.Dislike;
+            var rt = type.ToLowerInvariant() == "like"
+                ? ReactionType.Like
+                : ReactionType.Dislike;
 
             var result = await _postService.ToggleReactionAsync(new ToggleReactionRequest
             {
@@ -87,8 +101,20 @@ namespace LinkUp.Web.Controllers
                 ReactionType = rt
             });
 
+            var response = new
+            {
+                likeCount = result.LikeCount,
+                dislikeCount = result.DislikeCount,
+                myReaction = result.State
+            };
+
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                return Json(result);
+                return Json(new
+                {
+                    likeCount = result.LikeCount,
+                    dislikeCount = result.DislikeCount,
+                    state = result.State
+                });
 
             TempData["Info"] = "Reacción actualizada";
             return RedirectToAction(nameof(Index));
@@ -141,17 +167,41 @@ namespace LinkUp.Web.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
             try
             {
                 await _postService.DeleteAsync(new DeletePostRequest { PostId = id, UserId = userId });
-                TempData["Info"] = "Publicación eliminada.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-            return RedirectToAction("Index", "Home");
-        }
 
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Ok();
+
+                TempData["Info"] = "Publicación eliminada.";
+                return RedirectToAction("Index", "Home");
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return NotFound(ex.Message);
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Home");
+            }
+            catch (ValidationException ex)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return BadRequest(ex.Message);
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return StatusCode(500, "No se pudo eliminar la publicación.");
+
+                TempData["Error"] = "No se pudo eliminar la publicación.";
+                return RedirectToAction("Index", "Home");
+            }
+        }
     }
 }

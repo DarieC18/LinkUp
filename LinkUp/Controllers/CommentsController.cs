@@ -17,6 +17,10 @@ namespace LinkUp.Web.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var data = await _service.GetThreadAsync(postId, userId);
+
+            var ctx = (string?)Request.Query["ctx"];
+            ViewData["AllowCommentDelete"] = string.IsNullOrEmpty(ctx) || ctx != "friends";
+
             return PartialView("~/Views/Shared/_CommentsThread.cshtml", data);
         }
 
@@ -63,22 +67,43 @@ namespace LinkUp.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(DeleteCommentRequest req)
+        public async Task<IActionResult> Delete([FromForm] DeleteCommentRequest req)
         {
             req.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            if (req.CommentId == Guid.Empty && Request.HasFormContentType)
+            {
+                if (Guid.TryParse(Request.Form["Id"], out var formId) && formId != Guid.Empty)
+                    req.CommentId = formId;
+            }
+
+            if (req.CommentId == Guid.Empty)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return BadRequest(new { error = "Comment id is required." });
+
+                TempData["Error"] = "No se pudo identificar el comentario a eliminar.";
+                return Redirect(Request.Headers["Referer"].ToString());
+            }
+
             try
             {
                 await _service.DeleteAsync(req);
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") return Ok(new { ok = true });
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Ok(new { ok = true });
+
+                TempData["Info"] = "Comentario eliminado.";
                 return Redirect(Request.Headers["Referer"].ToString());
             }
             catch (Exception ex)
             {
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") return BadRequest(new { error = ex.Message });
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return BadRequest(new { error = ex.Message });
+
                 TempData["Error"] = ex.Message;
                 return Redirect(Request.Headers["Referer"].ToString());
             }
         }
-
     }
 }

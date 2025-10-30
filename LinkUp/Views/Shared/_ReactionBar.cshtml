@@ -1,49 +1,31 @@
 ﻿@model LinkUp.Application.DTOs.Social.PostFeedItemDto
 
 @{
-    string? reactionLabel =
-        Model.MyReactionIsLike == true ? "Me gusta" :
-        Model.MyReactionIsDislike == true ? "No me gusta" : null;
-
-    string likeHiddenClass = Model.MyReactionIsLike == true ? "d-none" : "";
-    string dislikeHiddenClass = Model.MyReactionIsDislike == true ? "d-none" : "";
-
-    string labelHiddenClass = reactionLabel is null ? "d-none" : "";
+    var state = Model.MyReactionIsLike == true
+        ? "liked"
+        : (Model.MyReactionIsDislike == true ? "disliked" : "none");
+    var hideLike = state == "liked" ? "d-none" : "";
+    var hideDislike = state == "disliked" ? "d-none" : "";
+    var labelClass = state == "none" ? "d-none" : "";
+    var labelText = state == "liked" ? "Me gusta" : (state == "disliked" ? "No me gusta" : "");
 }
 
-<form asp-antiforgery="true"></form>
-
-<div class="d-flex align-items-center gap-2 mb-2">
-    <!-- Texto de reacción seleccionada -->
-    <span class="small text-muted @labelHiddenClass" data-reaction-label>
-        @reactionLabel
-    </span>
-
-    <!-- Botón Like -->
+<form asp-antiforgery="true" class="reaction-bar d-flex align-items-center gap-3 mt-2">
     <button type="button"
-            class="btn btn-outline-secondary btn-sm @likeHiddenClass"
+            class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 @hideLike"
             data-react="like"
             data-post-id="@Model.Id">
-        👍 <span data-like-count>@Model.LikeCount</span>
+        <i class="bi bi-hand-thumbs-up"></i>
+        <span data-like-count>@Model.LikeCount</span>
     </button>
 
-    <!-- Botón Dislike -->
     <button type="button"
-            class="btn btn-outline-secondary btn-sm @dislikeHiddenClass"
+            class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 @hideDislike"
             data-react="dislike"
             data-post-id="@Model.Id">
-        👎 <span data-dislike-count>@Model.DislikeCount</span>
+        <i class="bi bi-hand-thumbs-down"></i>
+        <span data-dislike-count>@Model.DislikeCount</span>
     </button>
-</div>
 
-<script>
-    (function initReactionLabel(host){
-      if (!host) return;
-      const label = host.querySelector("[data-reaction-label]");
-      const likeHidden = host.querySelector("[data-react='like']")?.classList.contains("d-none");
-      const dislikeHidden = host.querySelector("[data-react='dislike']")?.classList.contains("d-none");
-      if (label && (likeHidden || dislikeHidden)) {
-        label.classList.remove("d-none");
-      }
-    })(document.currentScript.closest("[data-post-card]"));
-</script>
+    <small data-reaction-label class="text-muted @labelClass">@labelText</small>
+</form>

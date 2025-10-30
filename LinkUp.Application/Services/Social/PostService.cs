@@ -16,19 +16,23 @@ namespace LinkUp.Application.Services.Social
         private readonly IUsersReadOnly _users;
         private readonly IFileStorage _files;
         private readonly ICurrentUser _current;
+        private readonly IFriendshipRepository _friends;
+
 
         public PostService(
             IPostRepository posts,
             IReactionRepository reactions,
             IUsersReadOnly users,
             IFileStorage files,
-            ICurrentUser current)
+            ICurrentUser current,
+            IFriendshipRepository friends)
         {
             _posts = posts;
             _reactions = reactions;
             _users = users;
             _files = files;
             _current = current;
+            _friends = friends;
         }
         public async Task<Guid> CreateAsync(CreatePostRequest req)
         {
@@ -170,6 +174,55 @@ namespace LinkUp.Application.Services.Social
                 Items = items
             };
         }
+        public async Task<PagedResult<PostFeedItemDto>> GetFeedByFriendsAsync(string userId, int page, int pageSize, CancellationToken ct = default)
+        {
+            var friendIds = await _friends.ListFriendIdsAsync(userId, ct);
+            if (friendIds.Count == 0)
+            {
+                return new PagedResult<PostFeedItemDto>
+                {
+                    Page = page,
+                    PageSize = pageSize,
+                    Total = 0,
+                    Items = Array.Empty<PostFeedItemDto>()
+                };
+            }
+
+            var total = await _posts.CountByAuthorsAsync(friendIds);
+            var pageData = await _posts.GetFeedByAuthorsAsync(friendIds, page, pageSize);
+
+            var items = new PostFeedItemDto[pageData.Count];
+            for (int i = 0; i < pageData.Count; i++)
+            {
+                var p = pageData[i];
+                var ub = await _users.GetBasicAsync(p.UserId, ct);
+
+                items[i] = new PostFeedItemDto
+                {
+                    Id = p.Id,
+                    AuthorId = p.UserId,
+                    AuthorName = ub?.FullName ?? "Usuario",
+                    AuthorAvatarPath = ub?.AvatarPath,
+                    Content = p.Content,
+                    ImagePath = p.ImagePath,
+                    YouTubeVideoId = p.YouTubeVideoId,
+                    CreatedAtUtc = p.CreatedAtUtc,
+                    LikeCount = p.LikeCount,
+                    DislikeCount = p.DislikeCount,
+                    MyReactionIsLike = await _reactions.AnyAsync(p.Id, userId, ReactionType.Like),
+                    MyReactionIsDislike = await _reactions.AnyAsync(p.Id, userId, ReactionType.Dislike)
+                };
+            }
+
+            return new PagedResult<PostFeedItemDto>
+            {
+                Page = page,
+                PageSize = pageSize,
+                Total = total,
+                Items = items
+            };
+        }
+
         public async Task<PostForEditDto> GetForEditAsync(Guid postId, string userId)
         {
             var post = await _posts.GetByIdAsync(postId) ?? throw new InvalidOperationException("Publicación no encontrada.");

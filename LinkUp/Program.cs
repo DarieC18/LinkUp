@@ -31,12 +31,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
-
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseStaticFiles();
 app.MapStaticAssets();
 
 app.MapControllerRoute(

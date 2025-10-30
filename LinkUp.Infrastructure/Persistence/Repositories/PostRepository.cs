@@ -19,5 +19,16 @@ namespace LinkUp.Infrastructure.Persistence.Repositories
         public Task<int> CountAsync(string? userId) =>
             _db.Posts.CountAsync(p => !p.IsDeleted && (userId == null || p.UserId == userId));
         public Task SaveChangesAsync() => _db.SaveChangesAsync();
+        public async Task<int> CountByAuthorsAsync(IReadOnlyCollection<string> authorIds)
+    => await _db.Posts.Where(p => authorIds.Contains(p.UserId) && !p.IsDeleted).CountAsync();
+
+        public async Task<IReadOnlyList<Post>> GetFeedByAuthorsAsync(IReadOnlyCollection<string> authorIds, int page, int pageSize)
+            => await _db.Posts
+                .Where(p => authorIds.Contains(p.UserId) && !p.IsDeleted)
+                .OrderByDescending(p => p.CreatedAtUtc)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
     }
 }

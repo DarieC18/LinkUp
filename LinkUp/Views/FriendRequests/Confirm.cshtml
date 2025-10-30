@@ -1,0 +1,14 @@
+﻿@model LinkUp.Application.ViewModels.Shared.ConfirmActionVm
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<h3 class="mb-3">@Model.Title</h3>
+<p>@Model.Message</p>
+
+<form asp-action="@Model.PostAction" asp-controller="@Model.Controller" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+    <button type="submit" class="btn btn-primary">Confirmar</button>
+    <a asp-action="@Model.ReturnTo" class="btn btn-outline-secondary ms-2">Cancelar</a>
+</form>

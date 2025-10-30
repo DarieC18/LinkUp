@@ -11,5 +11,7 @@ namespace LinkUp.Application.Interfaces.Social
         Task<PostForEditDto> GetForEditAsync(Guid postId, string userId);
         Task EditAsync(EditPostRequest request);
         Task DeleteAsync(DeletePostRequest request);
+        Task<PagedResult<PostFeedItemDto>> GetFeedByFriendsAsync(string userId, int page, int pageSize, CancellationToken ct = default);
+
     }
 }

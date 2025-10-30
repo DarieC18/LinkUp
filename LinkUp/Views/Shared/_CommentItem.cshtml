@@ -1,11 +1,12 @@
 ﻿@model LinkUp.Application.DTOs.Social.CommentDto
 
-<div class="d-flex gap-2">
-    <img src="@(Model.AuthorAvatarPath ?? "/img/default-avatar.png")" class="rounded-circle" width="36" height="36" alt="avatar" />
+<div class="list-group-item d-flex align-items-start gap-2">
+    <img src="@(Model.AuthorAvatarPath ?? "/img/default-avatar.png")" class="rounded-circle" width="36" height="36" />
+
     <div class="flex-grow-1">
         <div class="d-flex align-items-center gap-2">
             <strong>@Model.AuthorName</strong>
-            <span class="text-muted small">@Model.CreatedAtUtc.ToLocalTime().ToString("g")</span>
+            <span class="text-muted small">@Model.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
         </div>
 
         <div>@Model.Content</div>
@@ -19,33 +20,50 @@
             @if (Model.IsMine)
             {
                 <button type="button" class="btn btn-link p-0 small" data-edit-toggle data-id="@Model.Id">Editar</button>
-
-                <form class="d-inline"
-                      method="post"
-                      asp-controller="Comments" asp-action="Delete"
-                      data-confirm="¿Eliminar este comentario?">
+                <form method="post"
+                      asp-controller="Comments"
+                      asp-action="Delete"
+                      data-confirm
+                      data-confirm-message="¿Eliminar este comentario?"
+                      data-delete-kind="comment">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" value="@Model.Id" />
                     <input type="hidden" name="CommentId" value="@Model.Id" />
-                    <button class="btn btn-link p-0 small text-danger" type="submit">Eliminar</button>
+                    <input type="hidden" name="PostId" value="@Model.PostId" />
+                    <button type="submit" class="btn btn-link text-danger p-0">Eliminar</button>
                 </form>
+
             }
         </div>
 
-        <form class="d-none mt-2" method="post" asp-controller="Comments" asp-action="Edit"
-              data-edit-form data-id="@Model.Id">
+        <form class="d-none mt-2"
+              method="post"
+              asp-controller="Comments"
+              asp-action="Edit"
+              data-edit-form
+              data-id="@Model.Id">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Id" value="@Model.Id" />
             <input type="hidden" name="CommentId" value="@Model.Id" />
+            <input type="hidden" name="PostId" value="@Model.PostId" />
             <div class="input-group">
-                <input class="form-control" name="Content" value="@Model.Content" />
+                <input class="form-control" name="Content" value="@Model.Content" required />
                 <button class="btn btn-outline-primary" type="submit">Guardar</button>
             </div>
         </form>
 
-        <form class="d-none mt-2" method="post"
-              asp-controller="Comments" asp-action="Reply"
-              data-reply-form data-parent="@Model.Id" data-post-id="@Model.PostId">
+        <form class="d-none mt-2"
+              method="post"
+              asp-controller="Comments"
+              asp-action="Reply"
+              data-reply-form
+              data-parent="@Model.Id"
+              data-post-id="@Model.PostId">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="ParentCommentId" value="@Model.Id" />
             <input type="hidden" name="PostId" value="@Model.PostId" />
             <div class="input-group">
-                <input class="form-control" name="Content" placeholder="Escribe un reply..." />
+                <input class="form-control" name="Content" placeholder="Escribe un reply..." required />
                 <button class="btn btn-outline-primary" type="submit">Enviar</button>
             </div>
         </form>
@@ -55,7 +73,7 @@
             <div class="ms-4 mt-2 vstack gap-2">
                 @foreach (var r in Model.Replies)
                 {
-                    @await Html.PartialAsync("~/Views/Shared/_CommentItem.cshtml", r)
+                    @await Html.PartialAsync("_CommentItem", r)
                 }
             </div>
         }
