@@ -3,20 +3,100 @@
     ViewData["Title"] = "Nueva partida";
 }
 
-<h2>Nueva partida</h2>
-
-<form asp-action="New" method="post">
-    @Html.AntiForgeryToken()
-    <div class="mb-3">
-        <label class="form-label">Selecciona un amigo:</label>
-        <select class="form-select" name="FriendUserId" required>
-            <option value="">-- Selecciona --</option>
-            @foreach (var f in Model)
-            {
-                <option value="@f.UserId">@f.UserName</option>
-            }
-        </select>
+<div class="container py-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Nueva partida</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
     </div>
-    <button type="submit" class="btn btn-primary">Iniciar partida</button>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
-</form>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Selecciona un amigo para comenzar una partida</h5>
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-light border text-muted">
+                    No tienes amigos disponibles para jugar en este momento.
+                </div>
+            }
+            else
+            {
+                <form asp-action="New" method="post" class="needs-validation" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div class="list-group list-group-flush border rounded">
+                        @foreach (var f in Model)
+                        {
+                            <label class="list-group-item list-group-item-action d-flex align-items-center py-2 friend-option"
+                                   style="cursor:pointer;">
+                                <input type="radio"
+                                       name="FriendUserId"
+                                       value="@f.UserId"
+                                       class="form-check-input me-3 flex-shrink-0"
+                                       required />
+
+                                @if (!string.IsNullOrWhiteSpace(f.AvatarUrl))
+                                {
+                                    <img src="@f.AvatarUrl"
+                                         alt="@f.UserName"
+                                         class="rounded-circle me-3"
+                                         style="width:48px; height:48px; object-fit:cover;">
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3"
+                                         style="width:48px; height:48px;">
+                                        <i class="bi bi-person fs-5"></i>
+                                    </div>
+                                }
+
+                                <span class="fw-semibold">@f.UserName</span>
+                            </label>
+                        }
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-controller"></i> Iniciar partida
+                        </button>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll(".friend-option").forEach(item => {
+            item.addEventListener("click", () => {
+                const input = item.querySelector("input[type=radio]");
+                input.checked = true;
+
+                document.querySelectorAll(".friend-option").forEach(el =>
+                    el.classList.remove("active"));
+
+                item.classList.add("active");
+            });
+        });
+    </script>
+
+    <style>
+        .friend-option.active {
+            background-color: #10b981 !important;
+            border-left: 4px solid black;
+            transition: background-color .15s ease-in-out;
+        }
+
+        .friend-option:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+}

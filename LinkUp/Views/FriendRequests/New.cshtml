@@ -3,7 +3,9 @@
     ViewData["Title"] = "Nueva solicitud";
 }
 
-<h3 class="mb-4">Enviar nueva solicitud de amistad</h3>
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="mb-0">Enviar nueva solicitud de amistad</h3>
+</div>
 
 @if (TempData["Error"] != null)
 {
@@ -18,12 +20,13 @@
     @Html.AntiForgeryToken()
 
     <div class="card-body">
-        <div class="d-flex mb-3">
-            <input type="text" id="searchBox" name="search" value="@ViewBag.Search"
-                   class="form-control me-2" placeholder="Buscar usuario..." />
-            <button type="submit" formaction="@Url.Action("New")" class="btn btn-outline-primary">
-                <i class="bi bi-search"></i>
-            </button>
+        <div class="d-flex align-items-stretch gap-2 mb-3">
+            <input type="text"
+                   id="searchBox"
+                   name="search"
+                   value="@ViewBag.Search"
+                   class="form-control"
+                   placeholder="Buscar usuario..." aria-label="Buscar usuario" />
         </div>
 
         @if (!Model.Any())
@@ -35,18 +38,34 @@
             <div class="list-group">
                 @foreach (var u in Model)
                 {
-                    <label class="list-group-item d-flex justify-content-between align-items-center">
+                    var inputId = $"select-user-{u.Id}";
+                    <label class="list-group-item d-flex justify-content-between align-items-center" for="@inputId">
                         <div class="d-flex align-items-center gap-2">
                             @if (!string.IsNullOrEmpty(u.AvatarPath))
                             {
-                                <img src="@u.AvatarPath" class="rounded-circle" width="40" height="40" />
+                                <img src="@u.AvatarPath"
+                                     class="rounded-circle flex-shrink-0"
+                                     width="40" height="40"
+                                     alt="Avatar de @u.FullName" />
+                            }
+                            else
+                            {
+                                <img src="/img/default-avatar.png"
+                                     class="rounded-circle flex-shrink-0"
+                                     width="40" height="40"
+                                     alt="Avatar por defecto" />
                             }
                             <div>
                                 <div class="fw-semibold">@u.FullName</div>
                                 <small class="text-muted">@u.MutualFriendsCount amigos en común</small>
                             </div>
                         </div>
-                        <input type="radio" name="selectedUserId" value="@u.Id" />
+
+                        <input id="@inputId"
+                               type="radio"
+                               name="selectedUserId"
+                               value="@u.Id"
+                               class="form-check-input ms-2" />
                     </label>
                 }
             </div>
@@ -65,12 +84,17 @@
 
 @section Scripts {
     <script>
-        // Filtro en vivo sin recargar
-        document.getElementById("searchBox").addEventListener("keyup", function () {
-            const term = this.value.toLowerCase();
-            document.querySelectorAll(".list-group-item").forEach(item => {
-                item.style.display = item.textContent.toLowerCase().includes(term) ? "" : "none";
+        (function () {
+            const searchBox = document.getElementById("searchBox");
+            if (!searchBox) return;
+
+            searchBox.addEventListener("keyup", function () {
+                const term = this.value.toLowerCase();
+                document.querySelectorAll(".list-group .list-group-item").forEach(item => {
+                    const match = item.textContent.toLowerCase().includes(term);
+                    item.style.display = match ? "" : "none";
+                });
             });
-        });
+        })();
     </script>
 }

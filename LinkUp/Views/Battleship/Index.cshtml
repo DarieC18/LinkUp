@@ -4,37 +4,78 @@
 }
 
 <div class="container-fluid px-0">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+
+    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
         <h2 class="mb-0">Battleship</h2>
-        <a asp-action="New" class="btn btn-primary">+ Nueva partida</a>
+        <div class="d-flex gap-2">
+        </div>
     </div>
 
-    @if (TempData["Error"] != null)
+    <!-- Alerts -->
+    @if (TempData["Error"] is string err && !string.IsNullOrWhiteSpace(err))
     {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+        <div class="alert alert-danger mb-3">@err</div>
     }
-    @if (TempData["Info"] != null)
+    @if (TempData["Info"] is string inf && !string.IsNullOrWhiteSpace(inf))
     {
-        <div class="alert alert-success">@TempData["Info"]</div>
+        <div class="alert alert-success mb-3">@inf</div>
     }
+
+    <!-- RESUMEN -->
+    <section class="mb-4">
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-muted small">Jugadas</div>
+                        <div class="display-6">@Model.Summary.TotalPlayed</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-muted small">Ganadas</div>
+                        <div class="display-6 text-success">@Model.Summary.Won</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="text-muted small">Perdidas</div>
+                        <div class="display-6 text-danger">@Model.Summary.Lost</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Partidas activas -->
     <section class="mb-4">
-        <h5 class="mb-2">Partidas activas</h5>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">Partidas activas</h5>
+        </div>
 
         @if (Model.ActiveGames == null || !Model.ActiveGames.Any())
         {
-            <div class="text-muted">No tienes partidas activas.</div>
+            <div class="card border-light bg-light-subtle">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
+                    <span class="text-muted">No tienes partidas activas.</span>
+                    <a asp-action="New" class="btn btn-sm btn-outline-primary">Crear partida</a>
+                </div>
+            </div>
         }
         else
         {
             <div class="table-responsive">
                 <table class="table table-sm align-middle">
+                    <caption class="text-muted ps-2">Tus partidas actualmente en curso</caption>
                     <thead class="table-light">
                         <tr>
-                            <th>Oponente</th>
-                            <th>Inicio</th>
-                            <th>Horas</th>
+                            <th class="text-nowrap">Oponente</th>
+                            <th class="text-nowrap">Inicio</th>
+                            <th class="text-nowrap">Horas</th>
                             <th class="text-end"></th>
                         </tr>
                     </thead>
@@ -42,11 +83,15 @@
                         @foreach (var g in Model.ActiveGames)
                         {
                             <tr>
-                                <td>@g.OpponentUserName</td>
+                                <td class="fw-medium">@g.OpponentUserName</td>
                                 <td>@g.StartedAt</td>
                                 <td>@($"{g.HoursSinceStart:F1} h")</td>
                                 <td class="text-end">
-                                    <a asp-action="Enter" asp-route-gameId="@g.GameId" class="btn btn-outline-secondary btn-sm">Entrar</a>
+                                    <a asp-action="Enter"
+                                       asp-route-gameId="@g.GameId"
+                                       class="btn btn-outline-secondary btn-sm">
+                                        Entrar
+                                    </a>
                                 </td>
                             </tr>
                         }
@@ -56,56 +101,29 @@
         }
     </section>
 
-    <hr class="my-3" />
-
-    <!-- RESUMEN -->
-    <section class="mb-4">
-        <div class="row g-3">
-            <div class="col-12 col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="text-muted small mb-1">Jugadas</div>
-                        <div class="display-6">@Model.Summary.TotalPlayed</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="text-muted small mb-1">Ganadas</div>
-                        <div class="display-6 text-success">@Model.Summary.Won</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="text-muted small mb-1">Perdidas</div>
-                        <div class="display-6 text-danger">@Model.Summary.Lost</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Historial -->
     <section>
         <h5 class="mb-2">Historial de partidas</h5>
 
         @if (Model.History == null || !Model.History.Any())
         {
-            <div class="text-muted">No tienes partidas finalizadas.</div>
+            <div class="card border-light bg-light-subtle">
+                <div class="card-body">
+                    <span class="text-muted">No tienes partidas finalizadas.</span>
+                </div>
+            </div>
         }
         else
         {
             <div class="table-responsive">
                 <table class="table table-sm align-middle">
+                    <caption class="text-muted ps-2">Resultados de partidas finalizadas</caption>
                     <thead class="table-light">
                         <tr>
-                            <th>Oponente</th>
-                            <th>Inicio</th>
-                            <th>Duración</th>
-                            <th>Resultado</th>
+                            <th class="text-nowrap">Oponente</th>
+                            <th class="text-nowrap">Inicio</th>
+                            <th class="text-nowrap">Duración</th>
+                            <th class="text-nowrap">Resultado</th>
                             <th class="text-end"></th>
                         </tr>
                     </thead>
@@ -113,12 +131,23 @@
                         @foreach (var h in Model.History)
                         {
                             <tr>
-                                <td>@h.OpponentUserName</td>
+                                <td class="fw-medium">@h.OpponentUserName</td>
                                 <td>@h.StartedAt</td>
                                 <td>@($"{h.DurationHours:F1} h")</td>
-                                <td>@(h.IWon ? "Ganada" : "Perdida")</td>
+                                <td>
+                                    @if (h.IWon)
+                                    {
+                                        <span class="badge text-bg-success">Ganada</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-danger">Perdida</span>
+                                    }
+                                </td>
                                 <td class="text-end">
-                                    <a asp-action="Results" asp-route-gameId="@h.GameId" class="btn btn-outline-info btn-sm">Ver</a>
+                                    <a asp-action="Results"
+                                       asp-route-gameId="@h.GameId"
+                                       class="btn btn-outline-info btn-sm">Ver</a>
                                 </td>
                             </tr>
                         }

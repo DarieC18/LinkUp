@@ -49,20 +49,17 @@ namespace LinkUp.Controllers
 
             var id = await _battleshipService.CreateGameAsync(CurrentUserId, req.FriendUserId);
             TempData["Info"] = "Partida creada correctamente. ¡Coloca tus barcos!";
-            return RedirectToAction(nameof(SelectShip), new { gameId = id });
+            return RedirectToAction(nameof(MyPlacement), new { gameId = id });
         }
 
         [HttpGet]
         public async Task<IActionResult> Enter(Guid gameId)
         {
             var userId = _userManager.GetUserId(User)!;
-
             var pending = await _battleshipService.GetSelectShipAsync(gameId, userId);
+
             if (pending.PendingShips?.Any() == true)
-            {
-                var nextShip = pending.PendingShips.First();
-                return RedirectToAction("MyPlacement", new { gameId, ship = nextShip });
-            }
+                return RedirectToAction(nameof(MyPlacement), new { gameId });
 
             var opp = await _battleshipService.GetOpponentBoardAsync(gameId, userId);
             if (!opp.IsOpponentReady)
@@ -71,14 +68,7 @@ namespace LinkUp.Controllers
                 return RedirectToAction("Index");
             }
 
-            return RedirectToAction("Attack", new { gameId });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> SelectShip(Guid gameId)
-        {
-            var vm = await _battleshipService.GetSelectShipAsync(gameId, CurrentUserId);
-            return View(vm);
+            return RedirectToAction(nameof(Attack), new { gameId });
         }
 
         [HttpGet]
@@ -89,11 +79,10 @@ namespace LinkUp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> MyPlacement(Guid gameId, string ship)
+        public async Task<IActionResult> MyPlacement(Guid gameId)
         {
             var userId = _userManager.GetUserId(User)!;
             var vm = await _battleshipService.GetMyPlacementAsync(gameId, userId);
-            ViewBag.SelectedShip = ship;
             return View(vm);
         }
 
@@ -109,9 +98,9 @@ namespace LinkUp.Controllers
 
             var pending = await _battleshipService.GetSelectShipAsync(dto.GameId, userId);
             if (pending.PendingShips?.Any() == true)
-                return RedirectToAction("MyPlacement", new { gameId = dto.GameId, ship = pending.PendingShips.First() });
+                return RedirectToAction(nameof(MyPlacement), new { gameId = dto.GameId });
 
-            return RedirectToAction("Attack", new { gameId = dto.GameId });
+            return RedirectToAction(nameof(Attack), new { gameId = dto.GameId });
         }
 
         [HttpGet]
@@ -131,7 +120,6 @@ namespace LinkUp.Controllers
 
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DoAttack(AttackRequestDto dto)
         {
             var result = await _battleshipService.DoAttackAsync(dto, CurrentUserId);

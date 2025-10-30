@@ -8,6 +8,8 @@ namespace LinkUp.Infrastructure.Identity.Entities
         [Required, MaxLength(50)]
         public string FirstName { get; set; } = default!;
 
+        public bool IsActive { get; set; } = true;
+
         [Required, MaxLength(50)]
         public string LastName { get; set; } = default!;
         public string? ProfilePhotoPath { get; set; }

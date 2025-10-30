@@ -1,33 +1,57 @@
 ﻿@model LinkUp.Application.ViewModels.Battleship.OpponentBoardVm
 @{
     ViewData["Title"] = "Tablero del oponente";
+    var size = Model.BoardSize <= 0 ? 12 : Model.BoardSize;
 }
 
-<h2>Tablero del oponente</h2>
+<link rel="stylesheet" href="~/css/battleship.css" />
 
-<div class="d-inline-block border border-2 rounded p-1">
-    <table class="table table-bordered mb-0">
-        <tbody>
-            @for (int r = 0; r < Model.BoardSize; r++)
-            {
-                <tr>
-                    @for (int c = 0; c < Model.BoardSize; c++)
+<div class="container py-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Tablero del oponente</h2>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Ataques del oponente sobre tu tablero</h5>
+
+            <div id="board" style="--cells:@size;">
+                @for (var r = 0; r < size; r++)
+                {
+                    for (var c = 0; c < size; c++)
                     {
-                        var val = Model.OpponentAttackState[r, c];
-                        string color = val switch
-                        {
-                            1 => "bg-danger",
-                            0 => "bg-primary",
-                            _ => "bg-light"
-                        };
-                        <td class="@color" style="width:28px; height:28px;"></td>
+                        var state = Model.OpponentAttackState[r, c];
+                        var cls = "cell";
+                        if (state == 1) cls += " hit";
+                        else if (state == 0) cls += " miss";
+
+                        <button type="button"
+                                class="@cls"
+                                disabled
+                                aria-label="fila @r, col @c">
+                        </button>
                     }
-                </tr>
-            }
-        </tbody>
-    </table>
+                }
+            </div>
+
+            <!-- Leyenda -->
+            <div class="mt-3 small text-muted d-flex flex-wrap gap-3">
+                <span><span class="legend-box me-1" style="display:inline-block;width:14px;height:14px;border:1px solid #e5e7eb;background:#f87171;"></span> Acierto del oponente</span>
+                <span><span class="legend-box me-1" style="display:inline-block;width:14px;height:14px;border:1px solid #e5e7eb;background:#93c5fd;"></span> Agua del oponente</span>
+                <span><span class="legend-box me-1" style="display:inline-block;width:14px;height:14px;border:1px solid #e5e7eb;background:#f8fafc;"></span> Sin disparos</span>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Results" asp-route-gameId="@Model.GameId" class="btn btn-secondary">Volver</a>
+    </div>
 </div>
 
-<div class="mt-3">
-    <a asp-action="Results" asp-route-gameId="@Model.GameId" class="btn btn-secondary">Volver</a>
-</div>
+@section Scripts {
+    <style>
+        #board .cell[disabled] {
+            cursor: default;
+        }
+    </style>
+}

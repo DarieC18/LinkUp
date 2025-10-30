@@ -68,20 +68,43 @@ namespace LinkUp.Infrastructure.Identity.Services
             var res = await _users.ConfirmEmailAsync(user, decoded);
             return res.Succeeded ? (true, null) : (false, "Token inválido o expirado.");
         }
+        public async Task<SignInResult> PasswordSignInAsync(LoginDto dto)
+        {
+            var key = dto.UserNameOrEmail.Trim();
+            var user = await _users.FindByNameAsync(key) ?? await _users.FindByEmailAsync(key);
+            if (user is null) return SignInResult.Failed;
 
-        public Task<SignInResult> PasswordSignInAsync(LoginDto dto)
-            => _signIn.PasswordSignInAsync(dto.UserNameOrEmail.Trim(), dto.Password, dto.RememberMe, lockoutOnFailure: true);
+            return await _signIn.PasswordSignInAsync(user, dto.Password, dto.RememberMe, lockoutOnFailure: true);
+        }
+
+        public async Task<AppUser?> FindByUserNameOrEmailAsync(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                return null;
+
+            return await _users.FindByNameAsync(key)
+                ?? await _users.FindByEmailAsync(key);
+        }
 
         public Task SignOutAsync() => _signIn.SignOutAsync();
 
         public async Task<bool> SendForgotAsync(ForgotPasswordViewModel vm, string origin)
         {
-            var user = await _users.Users.FirstOrDefaultAsync(u => u.Email == vm.Email);
-            if (user is null || !(await _users.IsEmailConfirmedAsync(user))) return false;
+            var username = vm.UserName?.Trim();
+            if (string.IsNullOrWhiteSpace(username)) return false;
+
+            var user = await _users.FindByNameAsync(username);
+            if (user is null) return true;
+
+            if (user.IsActive)
+            {
+                user.IsActive = false;
+                await _users.UpdateAsync(user);
+            }
 
             var resetUrl = await BuildResetPasswordUrl(user, origin);
             await _email.SendAsync(
-                vm.Email!,
+                user.Email!,
                 "Restablecer contraseña – LinkUp",
                 $"<p>Hola {System.Net.WebUtility.HtmlEncode(user.FirstName)},</p>" +
                 $"<p>Puedes restablecer tu contraseña aquí: <a href=\"{resetUrl}\">Restablecer</a></p>");
@@ -97,8 +120,16 @@ namespace LinkUp.Infrastructure.Identity.Services
             var decoded = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(vm.Token));
             var res = await _users.ResetPasswordAsync(user, decoded, vm.Password);
 
-            return res.Succeeded ? (true, Array.Empty<string>())
-                                 : (false, res.Errors.Select(e => e.Description));
+            if (!res.Succeeded)
+                return (false, res.Errors.Select(e => e.Description));
+
+            if (!user.IsActive)
+            {
+                user.IsActive = true;
+                await _users.UpdateAsync(user);
+            }
+
+            return (true, Array.Empty<string>());
         }
 
         public async Task<(bool sent, string? info)> ResendConfirmationAsync(string userNameOrEmail, string origin)

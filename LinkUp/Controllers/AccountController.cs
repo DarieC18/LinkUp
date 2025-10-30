@@ -75,8 +75,12 @@ namespace LinkUp.Web.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Index", "Home");
+
             if (Request.Query["msg"] == "auth")
                 TempData["Info"] = "Debe iniciar sesión para acceder a esta sección.";
 
@@ -88,6 +92,15 @@ namespace LinkUp.Web.Controllers
         public async Task<IActionResult> Login(LoginViewModel vm, string? returnUrl = null)
         {
             if (!ModelState.IsValid) return View(vm);
+
+            var key = vm.UserNameOrEmail?.Trim() ?? "";
+            var user = await _accounts.FindByUserNameOrEmailAsync(key);
+            if (user is not null && user.IsActive == false)
+            {
+                ModelState.AddModelError(string.Empty,
+                    "Tu cuenta está inactiva por un restablecimiento en curso. Revisa tu correo y completa el proceso.");
+                return View(vm);
+            }
 
             var dto = _mapper.Map<LoginDto>(vm);
             var signIn = await _accounts.PasswordSignInAsync(dto);
@@ -131,7 +144,7 @@ namespace LinkUp.Web.Controllers
             if (!ModelState.IsValid) return View(vm);
             var origin = $"{Request.Scheme}://{Request.Host}";
             var _ = await _accounts.SendForgotAsync(vm, origin);
-            TempData["Info"] = "Si el email existe y está confirmado, recibirás instrucciones.";
+            TempData["Info"] = "Si la cuenta existe, recibirás instrucciones para restablecer la contraseña.";
             return RedirectToAction(nameof(Login));
         }
 

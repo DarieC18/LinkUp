@@ -1,62 +1,26 @@
 ﻿@model LinkUp.Application.ViewModels.Battleship.MyPlacementVm
 @{
-    ViewData["Title"] = "Colocación";
-    var size = Model.BoardSize <= 0 ? 10 : Model.BoardSize;
-    var selectedShip = (string)(ViewBag.SelectedShip ?? "Destroyer");
+    ViewData["Title"] = "Colocación de barcos";
+    var size = Model.BoardSize <= 0 ? 12 : Model.BoardSize;
+    var pending = Model.PendingShips?.ToList() ?? new List<string> { "Carrier", "Battleship", "Cruiser", "Submarine", "Destroyer" };
 }
 
-<style>
-    /* --- Layout del tablero --- */
-    :root {
-        --board-max: min(68vmin, 520px);
-        --cell-gap: 4px;
-    }
+<link rel="stylesheet" href="~/css/battleship.css" />
 
-    #board {
-        display: grid;
-        grid-template-columns: repeat(var(--cells), 1fr);
-        grid-auto-rows: 1fr;
-        gap: var(--cell-gap);
-        width: var(--board-max);
-        aspect-ratio: 1/1;
-        background: #f8fafc;
-        padding: 6px;
-        border: 1px solid #e5e7eb;
-        border-radius: .5rem;
-    }
+<h2 class="mb-3">Colocación de barcos</h2>
 
-        #board .cell {
-            width: 100%;
-            height: 100%;
-            border: 1px solid #e5e7eb;
-            border-radius: .35rem;
-            transition: background-color .08s ease, outline-color .08s ease;
-        }
-
-            #board .cell.preview-ok {
-                background: #d1fae5;
-                outline: 2px solid #10b981;
-            }
-            /* verde */
-
-            #board .cell.preview-bad {
-                background: #fee2e2;
-                outline: 2px solid #ef4444;
-            }
-            /* rojo  */
-
-            #board .cell.occupied {
-                background: #cbd5e1 !important;
-            }
-    /* gris */
-</style>
-
-<h2 class="mb-3">Tablero de colocación</h2>
-
-<div class="alert alert-info">
-    Selecciona una celda y la dirección para posicionar tu barco:
-    <strong id="shipName">@selectedShip</strong>.
-</div>
+@if (pending.Count == 0)
+{
+    <div class="alert alert-success">
+        Has colocado todos tus barcos. Espera a tu oponente para iniciar la fase de ataque.
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        Selecciona un barco del listado y colócalo en el tablero.
+    </div>
+}
 
 <div class="row g-4 align-items-start">
     <!-- Tablero -->
@@ -81,7 +45,17 @@
     <div class="col-12 col-md-5 col-lg-4">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title mb-3">Controles</h5>
+                <h5 class="card-title mb-3">Seleccionar barco</h5>
+
+                <form id="shipSelectorForm" class="mb-3">
+                    <select id="shipSelect" class="form-select" required>
+                        <option value="">-- Selecciona un barco --</option>
+                        @foreach (var ship in pending)
+                        {
+                            <option value="@ship">@ship</option>
+                        }
+                    </select>
+                </form>
 
                 <div class="mb-3">
                     <label class="form-label d-block">Dirección</label>
@@ -92,20 +66,12 @@
                         <input type="radio" class="btn-check" name="direction" id="dirV" value="Down" autocomplete="off">
                         <label class="btn btn-outline-primary" for="dirV">Vertical</label>
                     </div>
-                    <div class="form-text">Tip: teclas <kbd>H</kbd>/<kbd>V</kbd> para cambiar.</div>
+                    <div class="form-text">Usa <kbd>H</kbd>/<kbd>V</kbd> para cambiar dirección.</div>
                 </div>
 
-                <div class="small text-muted mb-3">
+                <div class="mb-3 small text-muted">
                     Vista previa: <span class="text-success fw-semibold">verde</span> = válido,
                     <span class="text-danger fw-semibold">rojo</span> = inválido.
-                </div>
-
-                <div class="mb-3">
-                    <span class="badge bg-secondary me-1">Carrier 5</span>
-                    <span class="badge bg-secondary me-1">Battleship 4</span>
-                    <span class="badge bg-secondary me-1">Cruiser 3</span>
-                    <span class="badge bg-secondary me-1">Submarine 3</span>
-                    <span class="badge bg-secondary me-1">Destroyer 2</span>
                 </div>
 
                 <button class="btn btn-outline-secondary" onclick="history.back()">Volver</button>
@@ -114,11 +80,10 @@
     </div>
 </div>
 
-<!-- Form oculto -->
 <form id="placeForm" method="post" action="@Url.Action("PlaceShip","Battleship")" class="d-none">
     @Html.AntiForgeryToken()
     <input type="hidden" name="GameId" value="@Model.GameId" />
-    <input type="hidden" name="ShipType" value="@selectedShip" />
+    <input type="hidden" name="ShipType" />
     <input type="hidden" name="Row" />
     <input type="hidden" name="Col" />
     <input type="hidden" name="Direction" />
@@ -127,91 +92,126 @@
 @section Scripts {
     <script>
         (() => {
-          const size = @size;
-          const selectedShip = '@selectedShip';
-          const SHIP_LENGTH = { Carrier: 5, Battleship: 4, Cruiser: 3, Submarine: 3, Destroyer: 2 };
-          const length = SHIP_LENGTH[selectedShip] ?? 3;
+            const size = @size;
 
-          const form  = document.getElementById('placeForm');
-          const board = document.getElementById('board');
-          const cells = [...board.querySelectorAll('.cell')];
+            //tamano de todos los barcos conocidos
+            const SHIP_LENGTH = {
+                Carrier: 5,
+                Battleship: 4,
+                Cruiser: 3,
+                Submarine: 3,
+                Destroyer: 2,
+                Size5: 5,
+                Size4: 4,
+                Size3A: 3,
+                Size3B: 3,
+                Size2: 2
+            };
 
-          let direction = 'Right'; // 'Right' | 'Down'
-          const get = (r,c) => board.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-          const inBounds = (r,c) => r >= 0 && r < size && c >= 0 && c < size;
-          const isOccupied = (r,c) => get(r,c)?.classList.contains('occupied');
-
-          function clearPreview(){
-            cells.forEach(el => el.classList.remove('preview-ok','preview-bad'));
-            cells.forEach(el => el.style.outline='');
-          }
-
-          function footprint(row, col){
-            const fp = [];
-            for (let i=0; i<length; i++){
-              const rr = direction === 'Right' ? row     : row + i;
-              const cc = direction === 'Right' ? col + i : col;
-              fp.push([rr,cc]);
-            }
-            return fp;
-          }
-
-          function validate(fp){
-            for (const [r,c] of fp){
-              if (!inBounds(r,c)) return false;
-              if (isOccupied(r,c)) return false;
-            }
-            return true;
-          }
-
-          function renderPreview(fp, ok){
-            for (const [r,c] of fp){
-              const cell = get(r,c);
-              if (!cell) continue;
-              cell.classList.add(ok ? 'preview-ok' : 'preview-bad');
-            }
-          }
-
-          board.addEventListener('mousemove', (e) => {
-            const cell = e.target.closest('.cell');
-            if (!cell) return;
-            clearPreview();
-            const fp = footprint(+cell.dataset.row, +cell.dataset.col);
-            renderPreview(fp, validate(fp));
-          });
-
-          board.addEventListener('mouseleave', clearPreview);
-
-          board.addEventListener('click', (e) => {
-            const cell = e.target.closest('.cell');
-            if (!cell) return;
-
-            const row = +cell.dataset.row;
-            const col = +cell.dataset.col;
-            const fp  = footprint(row, col);
-            const ok  = validate(fp);
-
-            if (!ok){
-              clearPreview(); renderPreview(fp, false);
-              alert('Posición inválida: el barco se sale del tablero o se solapa con otro.');
-              return;
+            //obtener dinámicamente la longitud del barco seleccionado
+            function getLength() {
+                return SHIP_LENGTH[selectedShip] ?? 3;
             }
 
-            form.elements['Row'].value = row;
-            form.elements['Col'].value = col;
-            form.elements['Direction'].value = direction;
-            form.submit();
-          });
+            const form  = document.getElementById('placeForm');
+            const board = document.getElementById('board');
+            const cells = [...board.querySelectorAll('.cell')];
+            const select = document.getElementById('shipSelect');
 
-          window.addEventListener('keydown', (e) => {
-            const k = e.key.toLowerCase();
-            if (k === 'h'){ direction = 'Right'; document.getElementById('dirH').checked = true; clearPreview(); }
-            if (k === 'v'){ direction = 'Down';  document.getElementById('dirV').checked = true; clearPreview(); }
-          });
+            let direction = 'Right';
+            let selectedShip = '';
 
-          document.querySelectorAll('input[name="direction"]').forEach(r =>
-            r.addEventListener('change', () => { direction = r.value; clearPreview(); })
-          );
+            const get = (r,c) => board.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+            const inBounds = (r,c) => r >= 0 && r < size && c >= 0 && c < size;
+            const isOccupied = (r,c) => get(r,c)?.classList.contains('occupied');
+
+            function clearPreview() {
+                cells.forEach(el => el.classList.remove('preview-ok','preview-bad'));
+            }
+
+            function footprint(row, col) {
+                const len = getLength();
+                const fp = [];
+                for (let i = 0; i < len; i++) {
+                    const rr = direction === 'Right' ? row : row + i;
+                    const cc = direction === 'Right' ? col + i : col;
+                    fp.push([rr,cc]);
+                }
+                return fp;
+            }
+
+            function validate(fp) {
+                for (const [r,c] of fp) {
+                    if (!inBounds(r,c)) return false;
+                    if (isOccupied(r,c)) return false;
+                }
+                return true;
+            }
+
+            function renderPreview(fp, ok) {
+                for (const [r,c] of fp) {
+                    const cell = get(r,c);
+                    if (!cell) continue;
+                    cell.classList.add(ok ? 'preview-ok' : 'preview-bad');
+                }
+            }
+
+            board.addEventListener('mousemove', e => {
+                const cell = e.target.closest('.cell');
+                if (!cell || !selectedShip) return;
+                clearPreview();
+                const fp = footprint(+cell.dataset.row, +cell.dataset.col);
+                renderPreview(fp, validate(fp));
+            });
+
+            board.addEventListener('mouseleave', clearPreview);
+
+            //Clic para colocar barco
+            board.addEventListener('click', e => {
+                if (!selectedShip) {
+                    alert('Primero selecciona un barco.');
+                    return;
+                }
+
+                const cell = e.target.closest('.cell');
+                if (!cell) return;
+
+                const row = +cell.dataset.row;
+                const col = +cell.dataset.col;
+                const fp = footprint(row, col);
+                const ok = validate(fp);
+
+                if (!ok) {
+                    clearPreview(); renderPreview(fp, false);
+                    alert('Posición inválida o solapada.');
+                    return;
+                }
+
+                form.elements['ShipType'].value = selectedShip;
+                form.elements['Row'].value = row;
+                form.elements['Col'].value = col;
+                form.elements['Direction'].value = direction;
+                form.submit();
+            });
+
+            //Cambiar dirección (botones y teclas)
+            document.querySelectorAll('input[name="direction"]').forEach(r =>
+                r.addEventListener('change', () => { direction = r.value; clearPreview(); })
+            );
+
+            window.addEventListener('keydown', e => {
+                const k = e.key.toLowerCase();
+                if (k === 'h'){ direction = 'Right'; document.getElementById('dirH').checked = true; clearPreview(); }
+                if (k === 'v'){ direction = 'Down';  document.getElementById('dirV').checked = true; clearPreview(); }
+            });
+
+            //Cuando cambia el barco seleccionado, actualiza longitud y preview
+            select.addEventListener('change', () => {
+                selectedShip = select.value;
+                clearPreview();
+            });
         })();
     </script>
 }
+
+

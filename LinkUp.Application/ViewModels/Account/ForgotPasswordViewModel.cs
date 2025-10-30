@@ -4,7 +4,7 @@ namespace LinkUp.Application.ViewModels.Account
 {
     public class ForgotPasswordViewModel
     {
-        [Required, EmailAddress]
-        public string Email { get; set; } = "";
+        [Required(ErrorMessage = "El usuario es obligatorio.")]
+        public string UserName { get; set; } = "";
     }
 }

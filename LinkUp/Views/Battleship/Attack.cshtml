@@ -1,95 +1,97 @@
 ﻿@model LinkUp.Application.ViewModels.Battleship.AttackVm
 @{
-    ViewData["Title"] = "Tablero de ataque";
+    ViewData["Title"] = "Ataque";
+    var size = Model.BoardSize <= 0 ? 10 : Model.BoardSize;
 }
 
-<h2>Tablero de ataque</h2>
+<link rel="stylesheet" href="~/css/battleship.css" />
 
-<p><strong>@Model.TurnMessage</strong></p>
+<h2 class="mb-3">Fase de ataque</h2>
 
-<form id="attackForm" method="post" action="@Url.Action("DoAttack","Battleship")" class="d-none">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="GameId" value="@Model.GameId" />
-    <input type="hidden" name="Row" />
-    <input type="hidden" name="Col" />
-</form>
-
-<form id="surrenderForm" method="post" action="@Url.Action("Surrender","Battleship")" class="d-none">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="gameId" value="@Model.GameId" />
-</form>
-
-<div class="d-inline-block border border-2 rounded p-1">
-    <table id="attackBoard" class="table table-bordered mb-0">
-        <tbody>
-            @for (int r = 0; r < Model.BoardSize; r++)
-            {
-                <tr>
-                    @for (int c = 0; c < Model.BoardSize; c++)
-                    {
-                        var state = Model.AttackState[r, c];
-                        string color = state switch
-                        {
-                            1 => "bg-danger",  // impacto
-                            0 => "bg-primary", // agua
-                            _ => "bg-light"    // sin atacar
-                        };
-                        <td style="width:30px; height:30px;">
-                            @if (state == -1 && Model.IsMyTurn && !Model.IsGameFinished)
-                            {
-                                <button type="button"
-                                        class="cell btn btn-sm p-0 w-100 h-100 border-0 @color"
-                                        data-row="@r" data-col="@c"
-                                        title="Atacar"
-                                        aria-label="Atacar fila @r, columna @c">
-                                </button>
-                            }
-                            else
-                            {
-                                <div class="w-100 h-100 border @color"></div>
-                            }
-                        </td>
-                    }
-                </tr>
-            }
-        </tbody>
-    </table>
+<div class="alert alert-info">
+    @Model.TurnMessage
 </div>
 
-<div class="mt-3 d-flex gap-2">
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+<div class="d-flex flex-column align-items-center">
+    <div id="board" style="--cells:@size;">
+        @for (var r = 0; r < size; r++)
+        {
+            for (var c = 0; c < size; c++)
+            {
+                var state = Model.AttackState[r, c];
+                string cellClass = "cell";
+                if (state == 1) cellClass += " hit";
+                else if (state == 0) cellClass += " miss";
 
-    <a asp-action="Board" asp-route-gameId="@Model.GameId" class="btn btn-outline-primary">
-        Ver mi tablero
-    </a>
+                <button type="button"
+                        class="@cellClass"
+                        data-row="@r" data-col="@c"
+                        aria-label="fila @r, col @c">
+                </button>
+            }
+        }
+    </div>
 
-    @if (!Model.IsGameFinished)
-    {
-        <button type="submit" class="btn btn-outline-danger" form="surrenderForm">
-            Rendirse
-        </button>
-    }
+    <div class="mt-4 d-flex flex-wrap gap-3">
+        <form method="post" action="@Url.Action("Surrender","Battleship")">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="gameId" value="@Model.GameId" />
+            <button class="btn btn-danger" type="submit">Rendirse</button>
+        </form>
+
+        <a href="@Url.Action("Attack", "Battleship", new { gameId = Model.GameId })"
+           class="btn btn-outline-primary">Refrescar pantalla</a>
+
+        @if (Model.IsGameFinished)
+        {
+            <a href="@Url.Action("OpponentBoard", "Battleship", new { gameId = Model.GameId })"
+               class="btn btn-outline-secondary">Ver tablero del oponente</a>
+        }
+        else
+        {
+            <a href="@Url.Action("MyPlacement", "Battleship", new { gameId = Model.GameId })"
+               class="btn btn-outline-secondary">Ver mi tablero</a>
+        }
+
+        <a href="@Url.Action("Index", "Battleship")" class="btn btn-outline-dark">Volver</a>
+    </div>
+
 </div>
 
 @section Scripts {
     <script>
-        (function () {
-            const board = document.getElementById('attackBoard');
-            const form = document.getElementById('attackForm');
+        (() => {
+            const size = @size;
+            const gameId = '@Model.GameId';
+            const isMyTurn = @Model.IsMyTurn.ToString().ToLower();
 
-            if (board) {
-                board.addEventListener('click', function (e) {
-                    const btn = e.target.closest('.cell');
-                    if (!btn) return;
-
-                    const row = +btn.dataset.row;
-                    const col = +btn.dataset.col;
-
-                    form.elements['Row'].value = row;
-                    form.elements['Col'].value = col;
-                    form.submit();
-                });
+            if (!isMyTurn) {
+                console.log("No es tu turno, tablero bloqueado.");
+                return;
             }
+
+            const board = document.getElementById('board');
+
+            board.addEventListener('click', async (e) => {
+                const cell = e.target.closest('.cell');
+                if (!cell) return;
+                if (cell.classList.contains('hit') || cell.classList.contains('miss')) return;
+
+                const row = +cell.dataset.row;
+                const col = +cell.dataset.col;
+
+                const formData = new FormData();
+                formData.append('GameId', gameId);
+                formData.append('Row', row);
+                formData.append('Col', col);
+
+                const response = await fetch('@Url.Action("DoAttack", "Battleship")', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                location.reload();
+            });
         })();
     </script>
 }

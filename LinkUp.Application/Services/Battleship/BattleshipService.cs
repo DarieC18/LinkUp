@@ -294,7 +294,7 @@ namespace LinkUp.Application.Services.Battleship
                 IsMyTurn = game.CurrentTurnUserId == currentUserId,
                 IsGameFinished = game.Status == BattleshipGameStatus.Finished,
                 TurnMessage = game.Status == BattleshipGameStatus.Finished
-                    ? $"La partida ha terminado. {(game.WinnerUserId == currentUserId ? "Ganaste 🎉" : "Perdiste 😢")}"
+                    ? $"La partida ha terminado. {(game.WinnerUserId == currentUserId ? "Ganaste! " : "Perdiste!")}"
                     : (game.CurrentTurnUserId == currentUserId ? "Es tu turno para atacar" : "Es turno del oponente")
             };
 
@@ -501,11 +501,23 @@ namespace LinkUp.Application.Services.Battleship
                 }
             }
 
+            var placed = board.ShipPlacements.Select(p => p.ShipType).ToHashSet();
+
+            var pending = Enum.GetValues(typeof(ShipType))
+                .Cast<ShipType>()
+                .Where(t => !placed.Contains(t))
+                .Select(t => t.ToString())
+                .ToList();
+
             return new MyPlacementVm
             {
                 GameId = game.Id.ToString(),
                 BoardSize = BattleshipRules.BoardSize,
-                MyShips = matrix
+                MyShips = matrix,
+                PendingShips = pending,
+                InfoMessage = pending.Count == 0
+                    ? "Has colocado todos tus barcos."
+                    : "Selecciona un barco y posiciónalo en el tablero."
             };
         }
 
